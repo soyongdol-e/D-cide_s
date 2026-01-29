@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>딱 정해줄게</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href='/style.css' rel='stylesheet'>
 </head>
 <body>
@@ -15,29 +18,83 @@
   <nav class="game-tabs">
     <button class="tab-btn active" data-game="ladder">사다리타기</button>
     <button class="tab-btn" data-game="roulette">룰렛 돌리기</button>
+    <button class="tab-btn" data-game="menu">오늘 뭐 먹지?</button>
+    <button class="tab-btn" data-game="lotto">로또 번호</button>
+    <button class="tab-btn" data-game="petal">할까 말까?</button>
+    <button class="tab-btn" data-game="order">순서 정하기</button>
+    <button class="tab-btn" data-game="balance">밸런스 게임</button>
   </nav>
 
   <main>
     <!-- 사다리타기 게임 -->
     <section id="ladder-game" class="game-section active">
-      <div class="input-area">
-        <div class="input-group">
-          <label>참가자 (쉼표로 구분)</label>
-          <input type="text" id="ladder-players" placeholder="예: 철수, 영희, 민수, 지영">
+      <!-- Step 1: 인원수 입력 -->
+      <div id="ladder-step1" class="ladder-step">
+        <h3>몇 명인가요?</h3>
+        <div class="number-input-wrapper">
+          <input type="number" id="ladder-count" min="2" max="20" value="4" placeholder="2~20">
+          <span>명</span>
         </div>
-        <div class="input-group">
-          <label>결과 (쉼표로 구분)</label>
-          <input type="text" id="ladder-results" placeholder="예: 당첨, 꽝, 꽝, 대박">
+        <button id="confirm-count" class="primary-btn">확인</button>
+      </div>
+
+      <!-- Step 2: 사다리 설정 -->
+      <div id="ladder-step2" class="ladder-step" style="display:none;">
+        <!-- 모드 선택 -->
+        <div class="mode-selector">
+          <button class="mode-btn active" data-mode="number">숫자</button>
+          <button class="mode-btn" data-mode="name">이름</button>
         </div>
-        <button id="create-ladder" class="primary-btn">사다리 만들기</button>
+
+        <!-- 상단 라벨 (이름 모드일 때만 입력 가능) -->
+        <div id="top-labels"></div>
+
+        <!-- 사다리 미리보기 (세로선만) -->
+        <div id="ladder-preview">
+          <canvas id="ladder-canvas"></canvas>
+        </div>
+
+        <!-- 빠른 결과 입력 (당첨/꽝) -->
+        <div class="quick-fill-section">
+          <span class="quick-fill-label">빠른 입력:</span>
+          <div class="quick-fill-inputs">
+            <div class="quick-fill-item">
+              <span>당첨</span>
+              <input type="number" id="win-count" min="0" value="1">
+              <span>개</span>
+            </div>
+            <div class="quick-fill-item">
+              <span>꽝</span>
+              <input type="number" id="lose-count" min="0" value="0">
+              <span>개</span>
+            </div>
+            <button id="apply-quick-fill" class="quick-fill-btn">적용</button>
+          </div>
+        </div>
+
+        <!-- 하단 결과 입력 -->
+        <div id="bottom-labels"></div>
+
+        <div class="step-buttons">
+          <button id="back-to-step1" class="secondary-btn">이전</button>
+          <button id="start-ladder" class="primary-btn">사다리타기 시작!</button>
+        </div>
       </div>
-      <div id="ladder-container">
-        <canvas id="ladder-canvas"></canvas>
-        <div id="ladder-players-display"></div>
-        <div id="ladder-results-display"></div>
+
+      <!-- Step 3: 결과 보기 -->
+      <div id="ladder-step3" class="ladder-step" style="display:none;">
+        <p class="ladder-instruction">상단 항목을 클릭하여 결과를 확인하세요</p>
+        <div id="ladder-game-area">
+          <div id="top-labels-display"></div>
+          <canvas id="ladder-canvas-game"></canvas>
+          <div id="bottom-labels-display"></div>
+        </div>
+        <div class="step-buttons">
+          <button id="show-all-results" class="primary-btn">전체 결과 보기</button>
+          <button id="reset-ladder" class="secondary-btn">다시하기</button>
+        </div>
+        <div id="ladder-result-message"></div>
       </div>
-      <button id="start-ladder" class="primary-btn" style="display:none;">사다리 타기 시작!</button>
-      <div id="ladder-result-message"></div>
     </section>
 
     <!-- 룰렛 돌리기 게임 -->
@@ -57,6 +114,156 @@
       </div>
       <button id="spin-roulette" class="primary-btn" style="display:none;">룰렛 돌리기!</button>
       <div id="roulette-result-message"></div>
+    </section>
+
+    <!-- 랜덤 메뉴 생성기 -->
+    <section id="menu-game" class="game-section">
+      <h3>오늘 뭐 먹지?</h3>
+      <p class="section-desc">카테고리를 선택하고 메뉴를 추천받아 보세요!</p>
+
+      <div class="menu-categories">
+        <label class="category-checkbox">
+          <input type="checkbox" value="korean" checked>
+          <span class="category-label">한식</span>
+        </label>
+        <label class="category-checkbox">
+          <input type="checkbox" value="chinese" checked>
+          <span class="category-label">중식</span>
+        </label>
+        <label class="category-checkbox">
+          <input type="checkbox" value="japanese" checked>
+          <span class="category-label">일식</span>
+        </label>
+        <label class="category-checkbox">
+          <input type="checkbox" value="western" checked>
+          <span class="category-label">양식</span>
+        </label>
+        <label class="category-checkbox">
+          <input type="checkbox" value="snack" checked>
+          <span class="category-label">분식</span>
+        </label>
+      </div>
+
+      <button id="pick-menu" class="primary-btn">메뉴 추천받기!</button>
+
+      <div id="menu-result" class="menu-result-area">
+        <div id="menu-display" class="menu-display"></div>
+        <div id="menu-category-display" class="menu-category-display"></div>
+      </div>
+
+      <button id="pick-menu-again" class="secondary-btn" style="display:none; margin: var(--space-md) auto 0;">다시 뽑기</button>
+    </section>
+
+    <!-- 로또 번호 생성기 -->
+    <section id="lotto-game" class="game-section">
+      <h3>로또 번호 생성</h3>
+      <p class="section-desc">행운의 번호를 뽑아보세요!</p>
+
+      <div class="lotto-options">
+        <label>게임 수:</label>
+        <select id="lotto-game-count">
+          <option value="1">1게임</option>
+          <option value="2">2게임</option>
+          <option value="3">3게임</option>
+          <option value="4">4게임</option>
+          <option value="5" selected>5게임</option>
+        </select>
+      </div>
+
+      <button id="generate-lotto" class="primary-btn">번호 생성!</button>
+
+      <div id="lotto-results" class="lotto-results"></div>
+    </section>
+
+    <!-- 할까 말까? (꽃잎 떼기) -->
+    <section id="petal-game" class="game-section">
+      <!-- Step 1: 시작 선택 -->
+      <div id="petal-step1" class="petal-step">
+        <h3>할까 말까?</h3>
+        <p class="section-desc">처음에 뭐부터 시작할까?</p>
+        <div class="petal-choice-buttons">
+          <button class="petal-choice-btn" data-choice="do">한다</button>
+          <button class="petal-choice-btn" data-choice="dont">안 한다</button>
+        </div>
+      </div>
+
+      <!-- Step 2: 꽃잎 떼기 -->
+      <div id="petal-step2" class="petal-step" style="display:none;">
+        <div class="petal-current-text" id="petal-current-text"></div>
+        <div class="flower-container">
+          <div class="flower-center"></div>
+          <div id="petals-container"></div>
+        </div>
+        <p class="petal-instruction">꽃잎을 클릭해서 떼어보세요!</p>
+        <div id="petal-count-display" class="petal-count-display"></div>
+      </div>
+
+      <!-- Step 3: 결과 -->
+      <div id="petal-step3" class="petal-step" style="display:none;">
+        <div class="petal-final-result" id="petal-final-result"></div>
+        <button id="petal-restart" class="primary-btn">다시 하기</button>
+      </div>
+    </section>
+
+    <!-- 순서 정하기 -->
+    <section id="order-game" class="game-section">
+      <!-- Step 1: 인원수 입력 -->
+      <div id="order-step1" class="order-step">
+        <h3>몇 명인가요?</h3>
+        <div class="number-input-wrapper">
+          <input type="number" id="order-count" min="2" value="4" placeholder="2명 이상">
+          <span>명</span>
+        </div>
+        <button id="order-confirm-count" class="primary-btn">확인</button>
+      </div>
+
+      <!-- Step 2: 모드 선택 및 이름 입력 -->
+      <div id="order-step2" class="order-step" style="display:none;">
+        <div class="mode-selector">
+          <button class="order-mode-btn active" data-mode="number">숫자 모드</button>
+          <button class="order-mode-btn" data-mode="name">이름 입력 모드</button>
+        </div>
+
+        <!-- 이름 입력 영역 (이름 모드일 때만 표시) -->
+        <div id="order-name-inputs" style="display:none;"></div>
+
+        <!-- 숫자 모드 미리보기 -->
+        <div id="order-number-preview"></div>
+
+        <div class="step-buttons">
+          <button id="order-back-to-step1" class="secondary-btn">이전</button>
+          <button id="order-start" class="primary-btn">순서 정하기!</button>
+        </div>
+      </div>
+
+      <!-- Step 3: 결과 -->
+      <div id="order-step3" class="order-step" style="display:none;">
+        <h3>순서가 정해졌습니다!</h3>
+        <div id="order-result-list" class="order-result-list"></div>
+        <button id="order-restart" class="primary-btn">다시 하기</button>
+      </div>
+    </section>
+
+    <!-- 밸런스 게임 -->
+    <section id="balance-game" class="game-section">
+      <div id="balance-intro" class="balance-intro">
+        <h3>밸런스 게임</h3>
+        <p class="section-desc">둘 중 하나만 골라야 한다면?</p>
+        <button id="balance-start" class="primary-btn">질문 뽑기!</button>
+      </div>
+
+      <div id="balance-question" class="balance-question" style="display:none;">
+        <p class="balance-vs-text">VS</p>
+        <div class="balance-choices">
+          <button class="balance-choice-btn" id="balance-choice-a"></button>
+          <button class="balance-choice-btn" id="balance-choice-b"></button>
+        </div>
+        <div id="balance-result" class="balance-result"></div>
+        <div class="balance-buttons">
+          <button id="balance-next" class="primary-btn">다음 질문</button>
+          <button id="balance-restart" class="secondary-btn">처음으로</button>
+        </div>
+      </div>
     </section>
   </main>
 
