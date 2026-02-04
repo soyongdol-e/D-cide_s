@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>관리자 페이지 - 딱 정해줄게</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href='/style.css' rel='stylesheet'>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <style>
+    /* Admin specific styles */
+    .admin-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: var(--space-md);
+    }
+
+    .login-container {
+      text-align: center;
+      padding: var(--space-2xl);
+    }
+
+    .login-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-xl);
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      font-family: var(--font-family);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-normal);
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .login-btn img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .logout-btn {
+      padding: var(--space-sm) var(--space-md);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      font-family: var(--font-family);
+      border: 1px solid var(--error);
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--error);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .logout-btn:hover {
+      background: var(--error);
+      color: var(--text-on-primary);
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-xl);
+    }
+
+    .admin-user-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .admin-user-info img {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+    }
+
+    .admin-user-name {
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-primary);
+    }
+
+    .admin-tabs {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+    }
+
+    .admin-tab {
+      padding: var(--space-sm) var(--space-lg);
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+      font-family: var(--font-family);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      background: var(--bg-glass);
+      color: var(--text-secondary);
+      transition: all var(--transition-normal);
+    }
+
+    .admin-tab:hover {
+      background: var(--bg-glass-hover);
+      color: var(--text-primary);
+    }
+
+    .admin-tab.active {
+      background: var(--primary);
+      color: var(--text-on-primary);
+      border-color: var(--primary);
+    }
+
+    .admin-panel {
+      display: none;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .admin-panel.active {
+      display: block;
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+
+    .stat-card {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin-top: var(--space-xs);
+    }
+
+    /* Comments management */
+    .comments-filter {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: var(--space-xs) var(--space-md);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      font-family: var(--font-family);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-full);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .filter-btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: var(--text-on-primary);
+      border-color: var(--primary);
+    }
+
+    .admin-comment-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .admin-comment-item {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+    }
+
+    .admin-comment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--space-sm);
+    }
+
+    .admin-comment-meta {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .admin-comment-game {
+      display: inline-block;
+      padding: var(--space-xs) var(--space-sm);
+      background: var(--primary);
+      color: var(--text-on-primary);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .admin-comment-author {
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-primary);
+    }
+
+    .admin-comment-date {
+      font-size: var(--font-size-xs);
+      color: var(--text-tertiary);
+    }
+
+    .admin-comment-body {
+      color: var(--text-secondary);
+      margin-bottom: var(--space-sm);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .admin-delete-btn {
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--font-size-xs);
+      font-family: var(--font-family);
+      border: 1px solid var(--error);
+      border-radius: var(--radius-sm);
+      background: var(--error);
+      color: var(--text-on-primary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .admin-delete-btn:hover {
+      background: #c0392b;
+      border-color: #c0392b;
+    }
+
+    .access-denied {
+      text-align: center;
+      padding: var(--space-2xl);
+    }
+
+    .access-denied h2 {
+      color: var(--error);
+      margin-bottom: var(--space-md);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: var(--space-lg);
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .loading {
+      text-align: center;
+      padding: var(--space-xl);
+      color: var(--text-tertiary);
+    }
+
+    .no-comments {
+      text-align: center;
+      padding: var(--space-xl);
+      color: var(--text-tertiary);
+    }
+
+    @media (max-width: 600px) {
+      .admin-header {
+        flex-direction: column;
+        gap: var(--space-md);
+        text-align: center;
+      }
+
+      .admin-user-info {
+        flex-direction: column;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>관리자 페이지</h1>
+    <p class="subtitle">딱 정해줄게 관리 시스템</p>
+  </header>
+
+  <main class="admin-container">
+    <!-- 로그인 전 -->
+    <div id="login-section" class="game-section active">
+      <div class="login-container">
+        <h3>관리자 로그인</h3>
+        <p class="section-desc">Google 계정으로 로그인하세요</p>
+        <button id="login-btn" class="login-btn">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+          Google로 로그인
+        </button>
+      </div>
+    </div>
+
+    <!-- 접근 거부 -->
+    <div id="access-denied-section" class="game-section">
+      <div class="access-denied">
+        <h2>접근 권한이 없습니다</h2>
+        <p>이 페이지는 관리자만 접근할 수 있습니다.</p>
+        <p id="denied-email"></p>
+        <button id="logout-denied-btn" class="logout-btn">다른 계정으로 로그인</button>
+        <br>
+        <a href="/" class="back-link">← 메인 페이지로 돌아가기</a>
+      </div>
+    </div>
+
+    <!-- 관리자 대시보드 -->
+    <div id="admin-section" class="game-section">
+      <div class="admin-header">
+        <div class="admin-user-info">
+          <img id="user-photo" src="" alt="프로필">
+          <span class="admin-user-name" id="user-name"></span>
+        </div>
+        <button id="logout-btn" class="logout-btn">로그아웃</button>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-panel="stats">통계</button>
+        <button class="admin-tab" data-panel="comments">댓글 관리</button>
+      </div>
+
+      <!-- 통계 패널 -->
+      <div id="stats-panel" class="admin-panel active">
+        <h3>전체 통계</h3>
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="total-comments">-</div>
+            <div class="stat-label">전체 댓글</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="today-comments">-</div>
+            <div class="stat-label">오늘 댓글</div>
+          </div>
+        </div>
+        <h4>게임별 댓글 수</h4>
+        <div class="stats-grid" id="game-stats"></div>
+      </div>
+
+      <!-- 댓글 관리 패널 -->
+      <div id="comments-panel" class="admin-panel">
+        <h3>댓글 관리</h3>
+        <div class="comments-filter">
+          <button class="filter-btn active" data-filter="all">전체</button>
+          <button class="filter-btn" data-filter="ladder">사다리타기</button>
+          <button class="filter-btn" data-filter="roulette">룰렛</button>
+          <button class="filter-btn" data-filter="menu">오늘 뭐 먹지?</button>
+          <button class="filter-btn" data-filter="lotto">로또</button>
+          <button class="filter-btn" data-filter="petal">할까 말까?</button>
+          <button class="filter-btn" data-filter="order">순서 정하기</button>
+          <button class="filter-btn" data-filter="balance">밸런스 게임</button>
+          <button class="filter-btn" data-filter="recommend">오늘 뭐 볼까?</button>
+          <button class="filter-btn" data-filter="team">팀 정하기</button>
+        </div>
+        <div id="admin-comment-list" class="admin-comment-list">
+          <div class="loading">댓글을 불러오는 중...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <a href="/" class="back-link">← 메인 페이지로 돌아가기</a>
+  </footer>
+
+  <script src="/firebase-config.js"></script>
+  <script>
+    // ========== 관리자 설정 ==========
+    // 관리자 이메일 목록 (여러 명 추가 가능)
+    const ADMIN_EMAILS = [
+      'soyoung3268@gmail.com'
+    ];
+    // =================================
+
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    const gameNames = {
+      'ladder': '사다리타기',
+      'roulette': '룰렛',
+      'menu': '오늘 뭐 먹지?',
+      'lotto': '로또',
+      'petal': '할까 말까?',
+      'order': '순서 정하기',
+      'balance': '밸런스 게임',
+      'recommend': '오늘 뭐 볼까?',
+      'team': '팀 정하기'
+    };
+
+    let currentFilter = 'all';
+    let allComments = [];
+
+    // 인증 상태 변화 감지
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // 로그인됨
+        if (ADMIN_EMAILS.includes(user.email)) {
+          // 관리자
+          showAdminPanel(user);
+        } else {
+          // 권한 없음
+          showAccessDenied(user.email);
+        }
+      } else {
+        // 로그아웃
+        showLoginSection();
+      }
+    });
+
+    // 로그인
+    document.getElementById('login-btn').addEventListener('click', () => {
+      auth.signInWithPopup(provider).catch((error) => {
+        console.error('로그인 에러:', error);
+        alert('로그인 중 오류가 발생했습니다.');
+      });
+    });
+
+    // 로그아웃
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      auth.signOut();
+    });
+
+    document.getElementById('logout-denied-btn').addEventListener('click', () => {
+      auth.signOut();
+    });
+
+    function showLoginSection() {
+      document.getElementById('login-section').classList.add('active');
+      document.getElementById('access-denied-section').classList.remove('active');
+      document.getElementById('admin-section').classList.remove('active');
+    }
+
+    function showAccessDenied(email) {
+      document.getElementById('login-section').classList.remove('active');
+      document.getElementById('access-denied-section').classList.add('active');
+      document.getElementById('admin-section').classList.remove('active');
+      document.getElementById('denied-email').textContent = `현재 로그인: ${email}`;
+    }
+
+    function showAdminPanel(user) {
+      document.getElementById('login-section').classList.remove('active');
+      document.getElementById('access-denied-section').classList.remove('active');
+      document.getElementById('admin-section').classList.add('active');
+
+      document.getElementById('user-photo').src = user.photoURL || '';
+      document.getElementById('user-name').textContent = user.displayName || user.email;
+
+      loadStats();
+      loadComments();
+    }
+
+    // 탭 전환
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+
+        tab.classList.add('active');
+        document.getElementById(`${tab.dataset.panel}-panel`).classList.add('active');
+      });
+    });
+
+    // 필터 전환
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderComments();
+      });
+    });
+
+    // 통계 로드
+    async function loadStats() {
+      try {
+        const snapshot = await db.collection('comments').get();
+        const comments = [];
+        snapshot.forEach(doc => {
+          comments.push({ id: doc.id, ...doc.data() });
+        });
+
+        // 전체 댓글 수
+        document.getElementById('total-comments').textContent = comments.length;
+
+        // 오늘 댓글 수
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayComments = comments.filter(c => {
+          if (c.createdAt) {
+            const commentDate = c.createdAt.toDate();
+            return commentDate >= today;
+          }
+          return false;
+        });
+        document.getElementById('today-comments').textContent = todayComments.length;
+
+        // 게임별 통계
+        const gameStats = {};
+        Object.keys(gameNames).forEach(key => {
+          gameStats[key] = 0;
+        });
+
+        comments.forEach(c => {
+          if (gameStats.hasOwnProperty(c.gameId)) {
+            gameStats[c.gameId]++;
+          }
+        });
+
+        const gameStatsContainer = document.getElementById('game-stats');
+        gameStatsContainer.innerHTML = '';
+        Object.entries(gameStats).forEach(([key, count]) => {
+          const card = document.createElement('div');
+          card.className = 'stat-card';
+          card.innerHTML = `
+            <div class="stat-value">${count}</div>
+            <div class="stat-label">${gameNames[key]}</div>
+          `;
+          gameStatsContainer.appendChild(card);
+        });
+      } catch (error) {
+        console.error('통계 로드 에러:', error);
+      }
+    }
+
+    // 댓글 로드
+    function loadComments() {
+      db.collection('comments')
+        .orderBy('createdAt', 'desc')
+        .onSnapshot((snapshot) => {
+          allComments = [];
+          snapshot.forEach(doc => {
+            allComments.push({ id: doc.id, ...doc.data() });
+          });
+          renderComments();
+        }, (error) => {
+          console.error('댓글 로드 에러:', error);
+          document.getElementById('admin-comment-list').innerHTML =
+            '<div class="no-comments">댓글을 불러올 수 없습니다.</div>';
+        });
+    }
+
+    // 댓글 렌더링
+    function renderComments() {
+      const container = document.getElementById('admin-comment-list');
+
+      let filtered = allComments;
+      if (currentFilter !== 'all') {
+        filtered = allComments.filter(c => c.gameId === currentFilter);
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="no-comments">댓글이 없습니다.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      filtered.forEach(comment => {
+        const item = document.createElement('div');
+        item.className = 'admin-comment-item';
+
+        const createdAt = comment.createdAt ? comment.createdAt.toDate() : new Date();
+        const dateStr = formatDate(createdAt);
+
+        item.innerHTML = `
+          <div class="admin-comment-header">
+            <div class="admin-comment-meta">
+              <span class="admin-comment-game">${gameNames[comment.gameId] || comment.gameId}</span>
+              <span class="admin-comment-author">${escapeHtml(comment.nickname)}</span>
+              <span class="admin-comment-date">${dateStr}</span>
+            </div>
+            <button class="admin-delete-btn" data-id="${comment.id}">삭제</button>
+          </div>
+          <div class="admin-comment-body">${escapeHtml(comment.content)}</div>
+        `;
+
+        item.querySelector('.admin-delete-btn').addEventListener('click', () => {
+          deleteComment(comment.id);
+        });
+
+        container.appendChild(item);
+      });
+    }
+
+    // 댓글 삭제 (관리자 권한)
+    async function deleteComment(commentId) {
+      if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+
+      try {
+        await db.collection('comments').doc(commentId).delete();
+        loadStats(); // 통계 갱신
+      } catch (error) {
+        console.error('삭제 에러:', error);
+        alert('삭제 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 날짜 포맷
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hour = String(date.getHours()).padStart(2, '0');
+      const min = String(date.getMinutes()).padStart(2, '0');
+      return `${year}.${month}.${day} ${hour}:${min}`;
+    }
+
+    // HTML 이스케이프
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

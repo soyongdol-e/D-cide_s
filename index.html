@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href='/style.css' rel='stylesheet'>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <header>
@@ -23,6 +26,8 @@
     <button class="tab-btn" data-game="petal">할까 말까?</button>
     <button class="tab-btn" data-game="order">순서 정하기</button>
     <button class="tab-btn" data-game="balance">밸런스 게임</button>
+    <button class="tab-btn" data-game="recommend">오늘 뭐 볼까?</button>
+    <button class="tab-btn" data-game="team">팀 정하기</button>
   </nav>
 
   <main>
@@ -95,6 +100,18 @@
         </div>
         <div id="ladder-result-message"></div>
       </div>
+
+      <!-- 댓글 섹션 -->
+      <div class="comment-section" data-game="ladder">
+        <h4 class="comment-title">댓글</h4>
+        <div class="comment-form">
+          <input type="text" class="comment-nickname" placeholder="닉네임" maxlength="20">
+          <textarea class="comment-content" placeholder="댓글을 입력하세요" maxlength="200"></textarea>
+          <input type="password" class="comment-password" placeholder="비밀번호 (삭제용)" maxlength="10">
+          <button class="comment-submit-btn">댓글 작성</button>
+        </div>
+        <div class="comment-list"></div>
+      </div>
     </section>
 
     <!-- 룰렛 돌리기 게임 -->
@@ -114,6 +131,18 @@
       </div>
       <button id="spin-roulette" class="primary-btn" style="display:none;">룰렛 돌리기!</button>
       <div id="roulette-result-message"></div>
+
+      <!-- 댓글 섹션 -->
+      <div class="comment-section" data-game="roulette">
+        <h4 class="comment-title">댓글</h4>
+        <div class="comment-form">
+          <input type="text" class="comment-nickname" placeholder="닉네임" maxlength="20">
+          <textarea class="comment-content" placeholder="댓글을 입력하세요" maxlength="200"></textarea>
+          <input type="password" class="comment-password" placeholder="비밀번호 (삭제용)" maxlength="10">
+          <button class="comment-submit-btn">댓글 작성</button>
+        </div>
+        <div class="comment-list"></div>
+      </div>
     </section>
 
     <!-- 랜덤 메뉴 생성기 -->
@@ -152,6 +181,18 @@
       </div>
 
       <button id="pick-menu-again" class="secondary-btn" style="display:none; margin: var(--space-md) auto 0;">다시 뽑기</button>
+
+      <!-- 댓글 섹션 -->
+      <div class="comment-section" data-game="menu">
+        <h4 class="comment-title">댓글</h4>
+        <div class="comment-form">
+          <input type="text" class="comment-nickname" placeholder="닉네임" maxlength="20">
+          <textarea class="comment-content" placeholder="댓글을 입력하세요" maxlength="200"></textarea>
+          <input type="password" class="comment-password" placeholder="비밀번호 (삭제용)" maxlength="10">
+          <button class="comment-submit-btn">댓글 작성</button>
+        </div>
+        <div class="comment-list"></div>
+      </div>
     </section>
 
     <!-- 로또 번호 생성기 -->
@@ -173,6 +214,18 @@
       <button id="generate-lotto" class="primary-btn">번호 생성!</button>
 
       <div id="lotto-results" class="lotto-results"></div>
+
+      <!-- 댓글 섹션 -->
+      <div class="comment-section" data-game="lotto">
+        <h4 class="comment-title">댓글</h4>
+        <div class="comment-form">
+          <input type="text" class="comment-nickname" placeholder="닉네임" maxlength="20">
+          <textarea class="comment-content" placeholder="댓글을 입력하세요" maxlength="200"></textarea>
+          <input type="password" class="comment-password" placeholder="비밀번호 (삭제용)" maxlength="10">
+          <button class="comment-submit-btn">댓글 작성</button>
+        </div>
+        <div class="comment-list"></div>
+      </div>
     </section>
 
     <!-- 할까 말까? (꽃잎 떼기) -->
@@ -202,6 +255,18 @@
       <div id="petal-step3" class="petal-step" style="display:none;">
         <div class="petal-final-result" id="petal-final-result"></div>
         <button id="petal-restart" class="primary-btn">다시 하기</button>
+      </div>
+
+      <!-- 댓글 섹션 -->
+      <div class="comment-section" data-game="petal">
+        <h4 class="comment-title">댓글</h4>
+        <div class="comment-form">
+          <input type="text" class="comment-nickname" placeholder="닉네임" maxlength="20">
+          <textarea class="comment-content" placeholder="댓글을 입력하세요" maxlength="200"></textarea>
+          <input type="password" class="comment-password" placeholder="비밀번호 (삭제용)" maxlength="10">
+          <button class="comment-submit-btn">댓글 작성</button>
+        </div>
+        <div class="comment-list"></div>
       </div>
     </section>
 
@@ -242,6 +307,18 @@
         <div id="order-result-list" class="order-result-list"></div>
         <button id="order-restart" class="primary-btn">다시 하기</button>
       </div>
+
+      <!-- 댓글 섹션 -->
+      <div class="comment-section" data-game="order">
+        <h4 class="comment-title">댓글</h4>
+        <div class="comment-form">
+          <input type="text" class="comment-nickname" placeholder="닉네임" maxlength="20">
+          <textarea class="comment-content" placeholder="댓글을 입력하세요" maxlength="200"></textarea>
+          <input type="password" class="comment-password" placeholder="비밀번호 (삭제용)" maxlength="10">
+          <button class="comment-submit-btn">댓글 작성</button>
+        </div>
+        <div class="comment-list"></div>
+      </div>
     </section>
 
     <!-- 밸런스 게임 -->
@@ -264,6 +341,132 @@
           <button id="balance-restart" class="secondary-btn">처음으로</button>
         </div>
       </div>
+
+      <!-- 댓글 섹션 -->
+      <div class="comment-section" data-game="balance">
+        <h4 class="comment-title">댓글</h4>
+        <div class="comment-form">
+          <input type="text" class="comment-nickname" placeholder="닉네임" maxlength="20">
+          <textarea class="comment-content" placeholder="댓글을 입력하세요" maxlength="200"></textarea>
+          <input type="password" class="comment-password" placeholder="비밀번호 (삭제용)" maxlength="10">
+          <button class="comment-submit-btn">댓글 작성</button>
+        </div>
+        <div class="comment-list"></div>
+      </div>
+    </section>
+
+    <!-- 오늘 뭐 볼까? (콘텐츠 추천) -->
+    <section id="recommend-game" class="game-section">
+      <h3>오늘 뭐 볼까?</h3>
+      <p class="section-desc">장르를 선택하고 콘텐츠를 추천받아 보세요!</p>
+
+      <div class="recommend-categories">
+        <label class="category-checkbox">
+          <input type="checkbox" value="anime" checked>
+          <span class="category-label">애니메이션</span>
+        </label>
+        <label class="category-checkbox">
+          <input type="checkbox" value="movie" checked>
+          <span class="category-label">영화</span>
+        </label>
+        <label class="category-checkbox">
+          <input type="checkbox" value="drama" checked>
+          <span class="category-label">드라마</span>
+        </label>
+        <label class="category-checkbox">
+          <input type="checkbox" value="variety" checked>
+          <span class="category-label">예능</span>
+        </label>
+      </div>
+
+      <button id="pick-recommend" class="primary-btn">추천받기!</button>
+
+      <div id="recommend-result" class="menu-result-area">
+        <div id="recommend-display" class="menu-display"></div>
+        <div id="recommend-category-display" class="menu-category-display"></div>
+      </div>
+
+      <button id="pick-recommend-again" class="secondary-btn" style="display:none; margin: var(--space-md) auto 0;">다시 뽑기</button>
+
+      <!-- 댓글 섹션 -->
+      <div class="comment-section" data-game="recommend">
+        <h4 class="comment-title">댓글</h4>
+        <div class="comment-form">
+          <input type="text" class="comment-nickname" placeholder="닉네임" maxlength="20">
+          <textarea class="comment-content" placeholder="댓글을 입력하세요" maxlength="200"></textarea>
+          <input type="password" class="comment-password" placeholder="비밀번호 (삭제용)" maxlength="10">
+          <button class="comment-submit-btn">댓글 작성</button>
+        </div>
+        <div class="comment-list"></div>
+      </div>
+    </section>
+
+    <!-- 팀 정하기 -->
+    <section id="team-game" class="game-section">
+      <!-- Step 1: 팀/인원수 입력 -->
+      <div id="team-step1" class="team-step">
+        <h3>팀 정하기</h3>
+        <div class="team-input-group">
+          <label>팀이 몇 개인가요?</label>
+          <div class="number-input-wrapper">
+            <input type="number" id="team-count" min="2" max="20" value="2" placeholder="2~20">
+            <span>팀</span>
+          </div>
+        </div>
+        <div class="team-input-group">
+          <label>인원이 몇 명인가요?</label>
+          <div class="number-input-wrapper">
+            <input type="number" id="team-member-count" min="2" max="100" value="4" placeholder="2~100">
+            <span>명</span>
+          </div>
+        </div>
+        <button id="team-confirm-count" class="primary-btn">확인</button>
+      </div>
+
+      <!-- Step 2: 팀장 여부 선택 -->
+      <div id="team-step2" class="team-step" style="display:none;">
+        <h3>팀장이 있나요?</h3>
+        <div class="team-leader-choice">
+          <button class="team-choice-btn" data-leader="yes">예</button>
+          <button class="team-choice-btn" data-leader="no">아니오</button>
+        </div>
+      </div>
+
+      <!-- Step 3: 팀장 이름 입력 (팀장이 있을 때만) -->
+      <div id="team-step3" class="team-step" style="display:none;">
+        <h3>팀장의 이름을 입력하세요</h3>
+        <div id="team-leader-inputs"></div>
+        <button id="team-confirm-leaders" class="primary-btn">팀 정하기</button>
+      </div>
+
+      <!-- Step 4: 번호 정하기 안내 -->
+      <div id="team-step4" class="team-step" style="display:none;">
+        <h3>팀인원은 번호를 정하세요</h3>
+        <p class="section-desc">일렬로 서면 편합니다.</p>
+        <div class="team-number-guide">
+          <p>1번부터 <span id="team-total-display"></span>번까지 번호를 정해주세요!</p>
+        </div>
+        <button id="team-number-ready" class="primary-btn">번호 정했어요</button>
+      </div>
+
+      <!-- Step 5: 결과 -->
+      <div id="team-step5" class="team-step" style="display:none;">
+        <h3>팀이 정해졌습니다!</h3>
+        <div id="team-result-container"></div>
+        <button id="team-restart" class="primary-btn">다시 하기</button>
+      </div>
+
+      <!-- 댓글 섹션 -->
+      <div class="comment-section" data-game="team">
+        <h4 class="comment-title">댓글</h4>
+        <div class="comment-form">
+          <input type="text" class="comment-nickname" placeholder="닉네임" maxlength="20">
+          <textarea class="comment-content" placeholder="댓글을 입력하세요" maxlength="200"></textarea>
+          <input type="password" class="comment-password" placeholder="비밀번호 (삭제용)" maxlength="10">
+          <button class="comment-submit-btn">댓글 작성</button>
+        </div>
+        <div class="comment-list"></div>
+      </div>
     </section>
   </main>
 
@@ -271,6 +474,7 @@
     <p>결정 장애 탈출! 딱 정해줄게</p>
   </footer>
 
+  <script src="/firebase-config.js"></script>
   <script defer type="text/javascript" src="/main.js"></script>
 </body>
 </html>

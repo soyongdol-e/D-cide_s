@@ -10,7 +10,179 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (btn.dataset.game === 'petal') {
       startPetalGame();
     }
+
+    // 댓글 로드
+    loadComments(btn.dataset.game);
   });
+});
+
+// ==================== 댓글 기능 ====================
+// 댓글 작성
+function addComment(gameId, nickname, content, password) {
+  if (!nickname.trim() || !content.trim() || !password.trim()) {
+    alert('닉네임, 댓글 내용, 비밀번호를 모두 입력해주세요!');
+    return Promise.reject('빈 필드');
+  }
+
+  return db.collection('comments').add({
+    gameId: gameId,
+    nickname: nickname.trim(),
+    content: content.trim(),
+    password: password.trim(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+// 댓글 로드
+function loadComments(gameId) {
+  const section = document.querySelector(`.comment-section[data-game="${gameId}"]`);
+  if (!section) return;
+
+  const listContainer = section.querySelector('.comment-list');
+  listContainer.innerHTML = '<div class="comment-loading">댓글을 불러오는 중...</div>';
+
+  db.collection('comments')
+    .where('gameId', '==', gameId)
+    .orderBy('createdAt', 'desc')
+    .limit(50)
+    .onSnapshot((snapshot) => {
+      listContainer.innerHTML = '';
+
+      if (snapshot.empty) {
+        listContainer.innerHTML = '<div class="comment-empty">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</div>';
+        return;
+      }
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const commentEl = createCommentElement(doc.id, data);
+        listContainer.appendChild(commentEl);
+      });
+    }, (error) => {
+      console.error('댓글 로드 에러:', error);
+      listContainer.innerHTML = '<div class="comment-empty">댓글을 불러올 수 없습니다.</div>';
+    });
+}
+
+// 댓글 요소 생성
+function createCommentElement(id, data) {
+  const item = document.createElement('div');
+  item.className = 'comment-item';
+  item.dataset.id = id;
+
+  const createdAt = data.createdAt ? data.createdAt.toDate() : new Date();
+  const dateStr = formatDate(createdAt);
+
+  item.innerHTML = `
+    <div class="comment-header">
+      <span class="comment-author">${escapeHtml(data.nickname)}</span>
+      <span class="comment-date">${dateStr}</span>
+    </div>
+    <div class="comment-body">${escapeHtml(data.content)}</div>
+    <button class="comment-delete-btn" data-id="${id}">삭제</button>
+  `;
+
+  // 삭제 버튼 이벤트
+  item.querySelector('.comment-delete-btn').addEventListener('click', () => {
+    deleteComment(id);
+  });
+
+  return item;
+}
+
+// 댓글 삭제
+function deleteComment(commentId) {
+  const password = prompt('삭제하려면 비밀번호를 입력하세요:');
+  if (!password) return;
+
+  db.collection('comments').doc(commentId).get()
+    .then((doc) => {
+      if (!doc.exists) {
+        alert('댓글을 찾을 수 없습니다.');
+        return;
+      }
+
+      const data = doc.data();
+      if (data.password !== password) {
+        alert('비밀번호가 일치하지 않습니다.');
+        return;
+      }
+
+      return db.collection('comments').doc(commentId).delete();
+    })
+    .then(() => {
+      // 삭제 성공 시 아무것도 안 함 (onSnapshot이 자동으로 갱신)
+    })
+    .catch((error) => {
+      console.error('삭제 에러:', error);
+      alert('삭제 중 오류가 발생했습니다.');
+    });
+}
+
+// 날짜 포맷팅
+function formatDate(date) {
+  const now = new Date();
+  const diff = now - date;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (minutes < 1) return '방금 전';
+  if (minutes < 60) return `${minutes}분 전`;
+  if (hours < 24) return `${hours}시간 전`;
+  if (days < 7) return `${days}일 전`;
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}.${month}.${day}`;
+}
+
+// HTML 이스케이프
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// 댓글 폼 이벤트 설정
+document.querySelectorAll('.comment-section').forEach(section => {
+  const gameId = section.dataset.game;
+  const submitBtn = section.querySelector('.comment-submit-btn');
+  const nicknameInput = section.querySelector('.comment-nickname');
+  const contentInput = section.querySelector('.comment-content');
+  const passwordInput = section.querySelector('.comment-password');
+
+  submitBtn.addEventListener('click', () => {
+    const nickname = nicknameInput.value;
+    const content = contentInput.value;
+    const password = passwordInput.value;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '작성 중...';
+
+    addComment(gameId, nickname, content, password)
+      .then(() => {
+        nicknameInput.value = '';
+        contentInput.value = '';
+        passwordInput.value = '';
+      })
+      .catch((error) => {
+        if (error !== '빈 필드') {
+          console.error('댓글 작성 에러:', error);
+          alert('댓글 작성 중 오류가 발생했습니다.');
+        }
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '댓글 작성';
+      });
+  });
+});
+
+// 초기 댓글 로드 (기본 탭: ladder)
+document.addEventListener('DOMContentLoaded', () => {
+  loadComments('ladder');
 });
 
 // ==================== 사다리타기 ====================
@@ -1340,3 +1512,353 @@ function selectBalance(choice) {
 
   result.classList.add('visible');
 }
+
+// ==================== 오늘 뭐 볼까? (콘텐츠 추천) ====================
+const recommendData = {
+  anime: {
+    name: '애니메이션',
+    items: [
+      '귀멸의 칼날', '주술회전', '나의 히어로 아카데미아', '원펀맨', '진격의 거인',
+      '스파이 패밀리', '체인소 맨', '최애의 아이', '블루 락', '도쿄 리벤저스',
+      '슬램덩크', '하이큐!!', '원피스', '나루토', '블리치',
+      '귀여운 그녀', '스즈메의 문단속', '너의 이름은', '날씨의 아이', '센과 치히로의 행방불명',
+      '하울의 움직이는 성', '토토로', '모노노케 히메', '바람계곡의 나우시카', '벼랑 위의 포뇨',
+      '바이올렛 에버가든', '소드 아트 온라인', '리제로', 'Re:ZERO', '오버로드',
+      '암살교실', '도라에몽', '짱구는 못말려', '포켓몬스터', '디지몬 어드벤처',
+      '강철의 연금술사', '헌터x헌터', '데스노트', '코드기어스', '에반게리온',
+      '카우보이 비밥', '사이코패스', '스테인스 게이트', '괴물', '기생수',
+      '보쿠노 피코', '러키스타', '케이온!', '클라나드', '토라도라',
+      '약속의 네버랜드', '귀신 회생', '소울 이터', '페어리 테일', '블랙 클로버',
+      '못 말리는 내 동생', '나만이 없는 거리', '언어의 정원', '아이의 시간', '이웃집 토토로'
+    ]
+  },
+  movie: {
+    name: '영화',
+    items: [
+      '기생충', '올드보이', '범죄도시', '부산행', '광해',
+      '암살', '신과함께', '극한직업', '명량', '베테랑',
+      '타짜', '도둑들', '해운대', '괴물', '살인의 추억',
+      '아바타', '어벤져스: 엔드게임', '인터스텔라', '인셉션', '다크나이트',
+      '타이타닉', '쇼생크 탈출', '포레스트 검프', '매트릭스', '글래디에이터',
+      '라라랜드', '위대한 쇼맨', '보헤미안 랩소디', '알라딘', '겨울왕국',
+      '토이 스토리', '업', '코코', '인사이드 아웃', '소울',
+      '해리 포터', '반지의 제왕', '호빗', '스타워즈', '쥬라기 공원',
+      '어바웃 타임', '노트북', '비포 선라이즈', '러브 액츄얼리', '타이타닉',
+      '존 윅', '미션 임파서블', '본 시리즈', '킹스맨', '매드맥스',
+      '조커', '배트맨 비긴즈', '아이언맨', '가디언즈 오브 갤럭시', '스파이더맨',
+      '덩케르크', '1917', '세이빙 라이언 일병', '블랙호크 다운', '퓨리',
+      '쏘우', '컨저링', '겟 아웃', '콰이어트 플레이스', '미드소마'
+    ]
+  },
+  drama: {
+    name: '드라마',
+    items: [
+      '오징어 게임', '더 글로리', '무빙', '이상한 변호사 우영우', '재벌집 막내아들',
+      '슬기로운 의사생활', '응답하라 1988', '도깨비', '별에서 온 그대', '태양의 후예',
+      '사랑의 불시착', '비밀의 숲', '시그널', '킹덤', '마이 네임',
+      '나의 아저씨', 'SKY 캐슬', '미생', '비밀의 숲', '라이프',
+      '하이에나', '펜트하우스', '청춘기록', '이태원 클라쓰', '빈센조',
+      '스위트홈', '지금 우리 학교는', '소년심판', '작은 아씨들', '슈룹',
+      '경이로운 소문', '악귀', '마스크걸', '셀러브리티', '정신병동에도 아침이 와요',
+      '브레이킹 배드', '왕좌의 게임', '기묘한 이야기', '더 위쳐', '페이퍼 하우스',
+      '프렌즈', '오피스', '셜록', '블랙 미러', '체르노빌',
+      '로스트', '프리즌 브레이크', '워킹 데드', '하우스 오브 카드', '나르코스'
+    ]
+  },
+  variety: {
+    name: '예능',
+    items: [
+      '놀면 뭐하니?', '런닝맨', '나 혼자 산다', '전지적 참견 시점', '신서유기',
+      '삼시세끼', '윤식당', '강식당', '지구오락실', '출장 십오야',
+      '아는 형님', '미운 우리 새끼', '놀라운 토요일', '집사부일체', '불타는 청춘',
+      '라디오스타', '해피투게더', '유 퀴즈 온 더 블럭', '컴백홈', '문제적 남자',
+      '1박 2일', '슈퍼맨이 돌아왔다', '동상이몽', '살림하는 남자들', '아내의 맛',
+      '쇼미더머니', '고등래퍼', '스트릿 우먼 파이터', '싱어게인', '복면가왕',
+      '나는 가수다', '불후의 명곡', '히든싱어', '팬텀싱어', '보이스코리아',
+      '골목식당', '맛있는 녀석들', '백종원의 골목식당', '수요미식회', '식샤를 합시다',
+      '나영석 PD 시리즈', '이번 생은 처음이라', '환승연애', '하트시그널', '돌싱글즈'
+    ]
+  }
+};
+
+let recommendAnimationId = null;
+
+document.getElementById('pick-recommend').addEventListener('click', pickRandomRecommend);
+document.getElementById('pick-recommend-again').addEventListener('click', pickRandomRecommend);
+
+function pickRandomRecommend() {
+  const checkboxes = document.querySelectorAll('.recommend-categories input[type="checkbox"]:checked');
+  const selectedCategories = Array.from(checkboxes).map(cb => cb.value);
+
+  if (selectedCategories.length === 0) {
+    alert('최소 하나의 장르를 선택해주세요!');
+    return;
+  }
+
+  let allContents = [];
+  selectedCategories.forEach(cat => {
+    recommendData[cat].items.forEach(item => {
+      allContents.push({ content: item, category: recommendData[cat].name });
+    });
+  });
+
+  const contentDisplay = document.getElementById('recommend-display');
+  const categoryDisplay = document.getElementById('recommend-category-display');
+  const resultArea = document.getElementById('recommend-result');
+  const againBtn = document.getElementById('pick-recommend-again');
+
+  resultArea.style.display = 'block';
+  contentDisplay.classList.add('animating');
+  contentDisplay.classList.remove('revealed');
+
+  if (recommendAnimationId) {
+    cancelAnimationFrame(recommendAnimationId);
+  }
+
+  const duration = 2000;
+  const startTime = Date.now();
+  let lastUpdate = 0;
+
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    const progress = elapsed / duration;
+    const interval = 50 + progress * 200;
+
+    if (elapsed - lastUpdate > interval) {
+      const randomIdx = Math.floor(Math.random() * allContents.length);
+      contentDisplay.textContent = allContents[randomIdx].content;
+      categoryDisplay.textContent = allContents[randomIdx].category;
+      lastUpdate = elapsed;
+    }
+
+    if (elapsed < duration) {
+      recommendAnimationId = requestAnimationFrame(animate);
+    } else {
+      const finalIdx = Math.floor(Math.random() * allContents.length);
+      const finalContent = allContents[finalIdx];
+
+      contentDisplay.textContent = finalContent.content;
+      categoryDisplay.textContent = finalContent.category;
+      contentDisplay.classList.remove('animating');
+      contentDisplay.classList.add('revealed');
+      againBtn.style.display = 'block';
+    }
+  }
+
+  animate();
+}
+
+// ==================== 팀 정하기 ====================
+let teamData = {
+  teamCount: 0,
+  memberCount: 0,
+  hasLeader: false,
+  leaderNames: []
+};
+
+// Step 1: 팀/인원수 확인
+document.getElementById('team-confirm-count').addEventListener('click', () => {
+  const teamCount = parseInt(document.getElementById('team-count').value);
+  const memberCount = parseInt(document.getElementById('team-member-count').value);
+
+  if (teamCount < 2 || teamCount > 20 || isNaN(teamCount)) {
+    alert('팀 수는 2~20 사이로 입력해주세요!');
+    return;
+  }
+
+  if (memberCount < 2 || memberCount > 100 || isNaN(memberCount)) {
+    alert('인원 수는 2~100 사이로 입력해주세요!');
+    return;
+  }
+
+  if (memberCount < teamCount) {
+    alert('인원 수가 팀 수보다 적습니다!');
+    return;
+  }
+
+  teamData.teamCount = teamCount;
+  teamData.memberCount = memberCount;
+
+  // Step 2로 이동
+  document.getElementById('team-step1').style.display = 'none';
+  document.getElementById('team-step2').style.display = 'block';
+});
+
+// Enter 키로도 확인
+document.getElementById('team-count').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('team-member-count').focus();
+  }
+});
+
+document.getElementById('team-member-count').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('team-confirm-count').click();
+  }
+});
+
+// Step 2: 팀장 여부 선택
+document.querySelectorAll('.team-choice-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    teamData.hasLeader = btn.dataset.leader === 'yes';
+
+    document.getElementById('team-step2').style.display = 'none';
+
+    if (teamData.hasLeader) {
+      // 팀장 이름 입력 UI 생성
+      renderTeamLeaderInputs();
+      document.getElementById('team-step3').style.display = 'block';
+    } else {
+      // 팀장 없이 바로 번호 정하기 안내
+      document.getElementById('team-total-display').textContent = teamData.memberCount;
+      document.getElementById('team-step4').style.display = 'block';
+    }
+  });
+});
+
+// 팀장 이름 입력 UI 생성
+function renderTeamLeaderInputs() {
+  const container = document.getElementById('team-leader-inputs');
+  container.innerHTML = '';
+
+  for (let i = 0; i < teamData.teamCount; i++) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'team-leader-input-wrapper';
+    wrapper.innerHTML = `
+      <span class="team-leader-number">${i + 1}팀</span>
+      <input type="text" id="team-leader-${i}" class="team-leader-input" placeholder="팀장 이름">
+    `;
+    container.appendChild(wrapper);
+  }
+}
+
+// Step 3: 팀장 이름 확인 후 번호 정하기 안내
+document.getElementById('team-confirm-leaders').addEventListener('click', () => {
+  teamData.leaderNames = [];
+
+  for (let i = 0; i < teamData.teamCount; i++) {
+    const input = document.getElementById(`team-leader-${i}`);
+    const name = input.value.trim() || `${i + 1}팀 팀장`;
+    teamData.leaderNames.push(name);
+  }
+
+  // 팀장 제외한 인원 수 표시
+  const remainingMembers = teamData.memberCount - teamData.teamCount;
+  document.getElementById('team-total-display').textContent = remainingMembers;
+
+  document.getElementById('team-step3').style.display = 'none';
+  document.getElementById('team-step4').style.display = 'block';
+});
+
+// Step 4: 번호 정했어요 -> 결과 생성
+document.getElementById('team-number-ready').addEventListener('click', () => {
+  document.getElementById('team-step4').style.display = 'none';
+  document.getElementById('team-step5').style.display = 'block';
+
+  generateTeamResult();
+});
+
+// 팀 결과 생성
+function generateTeamResult() {
+  const container = document.getElementById('team-result-container');
+  container.innerHTML = '';
+
+  let members = [];
+  let membersPerTeam;
+
+  if (teamData.hasLeader) {
+    // 팀장이 있는 경우: 팀장 제외한 인원을 번호로 배정
+    const remainingCount = teamData.memberCount - teamData.teamCount;
+    for (let i = 1; i <= remainingCount; i++) {
+      members.push(i);
+    }
+    membersPerTeam = Math.floor(remainingCount / teamData.teamCount);
+  } else {
+    // 팀장이 없는 경우: 전체 인원을 번호로 배정
+    for (let i = 1; i <= teamData.memberCount; i++) {
+      members.push(i);
+    }
+    membersPerTeam = Math.floor(teamData.memberCount / teamData.teamCount);
+  }
+
+  // 멤버 셔플
+  for (let i = members.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [members[i], members[j]] = [members[j], members[i]];
+  }
+
+  // 팀별 멤버 배정
+  const teams = [];
+  for (let i = 0; i < teamData.teamCount; i++) {
+    teams.push([]);
+  }
+
+  // 기본 인원 배정
+  let memberIdx = 0;
+  for (let i = 0; i < teamData.teamCount; i++) {
+    for (let j = 0; j < membersPerTeam; j++) {
+      if (memberIdx < members.length) {
+        teams[i].push(members[memberIdx]);
+        memberIdx++;
+      }
+    }
+  }
+
+  // 남은 인원 랜덤 배정
+  while (memberIdx < members.length) {
+    const randomTeam = Math.floor(Math.random() * teamData.teamCount);
+    teams[randomTeam].push(members[memberIdx]);
+    memberIdx++;
+  }
+
+  // 각 팀 내 번호 정렬
+  for (let i = 0; i < teamData.teamCount; i++) {
+    teams[i].sort((a, b) => a - b);
+  }
+
+  // 결과 카드 생성
+  for (let i = 0; i < teamData.teamCount; i++) {
+    const card = document.createElement('div');
+    card.className = 'team-result-card';
+
+    let headerText;
+    if (teamData.hasLeader) {
+      headerText = teamData.leaderNames[i];
+    } else {
+      headerText = `${i + 1}팀`;
+    }
+
+    let membersHtml = '';
+    teams[i].forEach(num => {
+      membersHtml += `<div class="team-member-item">${num}번</div>`;
+    });
+
+    card.innerHTML = `
+      <div class="team-result-header">${headerText}</div>
+      <div class="team-result-members">${membersHtml}</div>
+    `;
+
+    container.appendChild(card);
+
+    // 순차적 애니메이션
+    setTimeout(() => {
+      card.classList.add('visible');
+    }, i * 150);
+  }
+}
+
+// 다시하기
+document.getElementById('team-restart').addEventListener('click', () => {
+  document.getElementById('team-step1').style.display = 'block';
+  document.getElementById('team-step2').style.display = 'none';
+  document.getElementById('team-step3').style.display = 'none';
+  document.getElementById('team-step4').style.display = 'none';
+  document.getElementById('team-step5').style.display = 'none';
+
+  teamData = {
+    teamCount: 0,
+    memberCount: 0,
+    hasLeader: false,
+    leaderNames: []
+  };
+});
