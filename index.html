@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>딱 정해줄게</title>
+  <meta name="description" content="결정이 어려울 때, 딱 정해줄게! 사다리타기, 룰렛, 로또 번호, 오늘 뭐 먹지, 밸런스 게임 등 9가지 무작위 결정 도구를 무료로 사용하세요." />
+  <title>딱 정해줄게 - 랜덤 결정 도구 모음</title>
+  <!-- URL 변경 시: 아래 og:url, canonical의 도메인을 새 주소로 교체하세요 -->
+  <link rel="canonical" href="https://d-cide-s.pages.dev/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="딱 정해줄게 - 랜덤 결정 도구 모음" />
+  <meta property="og:description" content="결정이 어려울 때, 딱 정해줄게! 사다리타기, 룰렛, 로또 번호 등 9가지 무작위 결정 도구를 무료로 사용하세요." />
+  <meta property="og:url" content="https://d-cide-s.pages.dev/" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:site_name" content="딱 정해줄게" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +25,6 @@
 <body>
   <header>
     <h1>딱 정해줄게</h1>
-    <p class="subtitle">결정이 어려울 때, 운에 맡겨보세요!</p>
   </header>
 
   <nav class="game-tabs">
@@ -33,6 +42,8 @@
   <main>
     <!-- 사다리타기 게임 -->
     <section id="ladder-game" class="game-section active">
+      <p class="section-desc">누가 당첨될지 모르는 그 긴장감! 인원을 정하고 사다리를 타서 결과를 확인하세요.</p>
+
       <!-- Step 1: 인원수 입력 -->
       <div id="ladder-step1" class="ladder-step">
         <h3>몇 명인가요?</h3>
@@ -116,6 +127,9 @@
 
     <!-- 룰렛 돌리기 게임 -->
     <section id="roulette-game" class="game-section">
+      <h3>룰렛 돌리기</h3>
+      <p class="section-desc">고민되는 선택지를 넣고 룰렛을 돌려보세요. 운명이 대신 골라드립니다.</p>
+
       <div class="input-area">
         <div class="input-group">
           <label>항목 (쉼표로 구분)</label>
@@ -148,7 +162,7 @@
     <!-- 랜덤 메뉴 생성기 -->
     <section id="menu-game" class="game-section">
       <h3>오늘 뭐 먹지?</h3>
-      <p class="section-desc">카테고리를 선택하고 메뉴를 추천받아 보세요!</p>
+      <p class="section-desc">오늘 메뉴 고민되나요? 카테고리를 선택하면 랜덤으로 메뉴를 추천해드립니다.</p>
 
       <div class="menu-categories">
         <label class="category-checkbox">
@@ -198,7 +212,7 @@
     <!-- 로또 번호 생성기 -->
     <section id="lotto-game" class="game-section">
       <h3>로또 번호 생성</h3>
-      <p class="section-desc">행운의 번호를 뽑아보세요!</p>
+      <p class="section-desc">자동 발급 전에 번호 한 번 보고 싶을 때! 무작위로 로또 번호를 생성하고 점검해보세요.</p>
 
       <div class="lotto-options">
         <label>게임 수:</label>
@@ -233,7 +247,8 @@
       <!-- Step 1: 시작 선택 -->
       <div id="petal-step1" class="petal-step">
         <h3>할까 말까?</h3>
-        <p class="section-desc">처음에 뭐부터 시작할까?</p>
+        <p class="section-desc">결정을 못 내릴 땐 꽃잎에 맡겨보세요. 꽃잎을 하나씩 떼며 한다, 안 한다의 답을 찾아보세요.</p>
+        <p class="section-desc" style="margin-bottom: var(--space-sm);">처음에 뭐부터 시작할까?</p>
         <div class="petal-choice-buttons">
           <button class="petal-choice-btn" data-choice="do">한다</button>
           <button class="petal-choice-btn" data-choice="dont">안 한다</button>
@@ -272,6 +287,8 @@
 
     <!-- 순서 정하기 -->
     <section id="order-game" class="game-section">
+      <p class="section-desc">발표 순서, 청소 당번, 게임 순서... 무작위로 공정하게 순서를 결정해드립니다.</p>
+
       <!-- Step 1: 인원수 입력 -->
       <div id="order-step1" class="order-step">
         <h3>몇 명인가요?</h3>
@@ -325,7 +342,7 @@
     <section id="balance-game" class="game-section">
       <div id="balance-intro" class="balance-intro">
         <h3>밸런스 게임</h3>
-        <p class="section-desc">둘 중 하나만 골라야 한다면?</p>
+        <p class="section-desc">둘 중 하나만 골라야 한다면? 재미있는 질문들로 친구들과 함께 밸런스를 겨뤄보세요.</p>
         <button id="balance-start" class="primary-btn">질문 뽑기!</button>
       </div>
 
@@ -358,7 +375,7 @@
     <!-- 오늘 뭐 볼까? (콘텐츠 추천) -->
     <section id="recommend-game" class="game-section">
       <h3>오늘 뭐 볼까?</h3>
-      <p class="section-desc">장르를 선택하고 콘텐츠를 추천받아 보세요!</p>
+      <p class="section-desc">뭘 볼지 고민 중이신가요? 장르를 선택하면 오늘 볼 콘텐츠를 추천해드립니다.</p>
 
       <div class="recommend-categories">
         <label class="category-checkbox">
@@ -406,6 +423,7 @@
       <!-- Step 1: 팀/인원수 입력 -->
       <div id="team-step1" class="team-step">
         <h3>팀 정하기</h3>
+        <p class="section-desc">팀 구성이 필요할 때! 인원과 팀 수를 정하면 무작위로 공정하게 팀을 나눠드립니다.</p>
         <div class="team-input-group">
           <label>팀이 몇 개인가요?</label>
           <div class="number-input-wrapper">
@@ -471,7 +489,23 @@
   </main>
 
   <footer>
-    <p>결정 장애 탈출! 딱 정해줄게</p>
+    <div class="footer-inner">
+      <div class="footer-col">
+        <strong class="footer-brand">딱 정해줄게</strong>
+        <p>결정이 어려울 때, 운에 맡겨보세요.<br>9가지 랜덤 도구로 일상의 고민을 해결합니다.</p>
+      </div>
+      <div class="footer-col">
+        <strong>사이트 소개</strong>
+        <p>딱 정해줄게는 사다리타기, 룰렛, 밸런스 게임 등<br>다양한 무작위 결정 도구를 무료로 제공하는 서비스입니다.<br>누구나 광고 없이 자유롭게 이용할 수 있습니다.</p>
+      </div>
+      <div class="footer-col">
+        <strong>개인정보처리방침</strong>
+        <p>게임 내 입력된 정보는 일회성으로 사용 후 즉시 소멸됩니다.<br>댓글 작성 시 닉네임과 비밀번호 외의 개인정보는 수집하지 않습니다.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 딱 정해줄게 · <a href="/about.html" style="color:inherit;">사이트 소개</a> · <a href="/privacy.html" style="color:inherit;">개인정보처리방침</a></p>
+    </div>
   </footer>
 
   <script src="/firebase-config.js"></script>

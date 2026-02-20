@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="딱 정해줄게 사이트 소개 - 사다리타기, 룰렛, 로또 번호 등 9가지 무작위 결정 도구를 무료로 제공하는 서비스입니다." />
+  <title>사이트 소개 - 딱 정해줄게</title>
+  <!-- URL 변경 시: 아래 og:url, canonical의 도메인을 새 주소로 교체하세요 -->
+  <link rel="canonical" href="https://d-cide-s.pages.dev/about.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="사이트 소개 - 딱 정해줄게" />
+  <meta property="og:description" content="딱 정해줄게 사이트 소개 - 사다리타기, 룰렛, 로또 번호 등 9가지 무작위 결정 도구를 무료로 제공하는 서비스입니다." />
+  <meta property="og:url" content="https://d-cide-s.pages.dev/about.html" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:site_name" content="딱 정해줄게" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href='/style.css' rel='stylesheet'>
+  <style>
+    .about-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--space-md);
+    }
+
+    .about-card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-light);
+      margin-bottom: var(--space-lg);
+    }
+
+    .about-card h2 {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-primary);
+      margin-bottom: var(--space-md);
+    }
+
+    .about-card p {
+      font-size: var(--font-size-md);
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: var(--space-md);
+    }
+
+    .about-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .game-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-md);
+      margin-top: var(--space-lg);
+    }
+
+    .game-list-item {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md) var(--space-lg);
+    }
+
+    .game-list-item strong {
+      display: block;
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-primary);
+      margin-bottom: var(--space-xs);
+    }
+
+    .game-list-item span {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: var(--space-lg);
+      font-size: var(--font-size-sm);
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: var(--font-weight-medium);
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .about-card {
+        padding: var(--space-lg);
+      }
+
+      .game-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="/" style="text-decoration:none; color:inherit;">딱 정해줄게</a></h1>
+  </header>
+
+  <main class="about-content">
+    <a href="/" class="back-link">← 메인으로 돌아가기</a>
+
+    <div class="about-card">
+      <h2>딱 정해줄게란?</h2>
+      <p>
+        결정 장애, 다들 한 번쯤 겪어보셨죠? 오늘 뭐 먹을지, 누가 먼저 발표할지, 어느 팀에 들어갈지...
+        일상 속 크고 작은 결정들이 의외로 많은 에너지를 소모합니다.
+      </p>
+      <p>
+        <strong>딱 정해줄게</strong>는 그런 고민을 대신 해결해드리는 무작위 결정 도우미 서비스입니다.
+        사다리타기, 룰렛, 로또 번호 등 9가지 도구를 무료로 제공하며,
+        별도 회원가입 없이 누구나 바로 이용할 수 있습니다.
+      </p>
+    </div>
+
+    <div class="about-card">
+      <h2>제공하는 기능</h2>
+      <div class="game-list">
+        <div class="game-list-item">
+          <strong>사다리타기</strong>
+          <span>당첨자 뽑기, 역할 배분에 활용하는 클래식 사다리 게임</span>
+        </div>
+        <div class="game-list-item">
+          <strong>룰렛 돌리기</strong>
+          <span>원하는 항목을 직접 입력해 돌리는 커스텀 룰렛</span>
+        </div>
+        <div class="game-list-item">
+          <strong>오늘 뭐 먹지?</strong>
+          <span>한식, 중식, 일식 등 카테고리별 랜덤 메뉴 추천</span>
+        </div>
+        <div class="game-list-item">
+          <strong>로또 번호</strong>
+          <span>최대 5게임의 랜덤 로또 번호 자동 생성</span>
+        </div>
+        <div class="game-list-item">
+          <strong>할까 말까?</strong>
+          <span>꽃잎 떼기로 결정하는 한다 / 안 한다 게임</span>
+        </div>
+        <div class="game-list-item">
+          <strong>순서 정하기</strong>
+          <span>발표 순서, 게임 순서를 무작위로 공정하게 결정</span>
+        </div>
+        <div class="game-list-item">
+          <strong>밸런스 게임</strong>
+          <span>재미있는 양자택일 질문으로 즐기는 밸런스 게임</span>
+        </div>
+        <div class="game-list-item">
+          <strong>오늘 뭐 볼까?</strong>
+          <span>영화, 드라마, 예능 등 오늘 볼 콘텐츠 랜덤 추천</span>
+        </div>
+        <div class="game-list-item">
+          <strong>팀 정하기</strong>
+          <span>인원과 팀 수를 정하면 무작위로 팀을 나눠주는 도구</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-card">
+      <h2>이용 안내</h2>
+      <p>모든 기능은 무료이며 별도 회원가입이 필요하지 않습니다.</p>
+      <p>게임 내 입력 정보(이름, 항목 등)는 서버에 저장되지 않으며 페이지를 벗어나면 즉시 소멸됩니다.</p>
+      <p>각 게임 하단의 댓글 기능을 통해 자유롭게 의견을 남길 수 있습니다. 댓글 작성 시 닉네임과 비밀번호(삭제용)만 입력하면 됩니다.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-col">
+        <strong class="footer-brand">딱 정해줄게</strong>
+        <p>결정이 어려울 때, 운에 맡겨보세요.<br>9가지 랜덤 도구로 일상의 고민을 해결합니다.</p>
+      </div>
+      <div class="footer-col">
+        <strong>사이트 소개</strong>
+        <p>딱 정해줄게는 사다리타기, 룰렛, 밸런스 게임 등<br>다양한 무작위 결정 도구를 무료로 제공하는 서비스입니다.<br>누구나 광고 없이 자유롭게 이용할 수 있습니다.</p>
+      </div>
+      <div class="footer-col">
+        <strong>개인정보처리방침</strong>
+        <p>게임 내 입력된 정보는 일회성으로 사용 후 즉시 소멸됩니다.<br>댓글 작성 시 닉네임과 비밀번호 외의 개인정보는 수집하지 않습니다.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 딱 정해줄게 · <a href="/about.html" style="color:inherit;">사이트 소개</a> · <a href="/privacy.html" style="color:inherit;">개인정보처리방침</a></p>
+    </div>
+  </footer>
+</body>
+</html>
