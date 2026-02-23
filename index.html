@@ -56,6 +56,11 @@
           <div class="nav-dropdown">
             <button class="tab-btn" data-game="balance">밸런스 게임</button>
             <button class="tab-btn" data-game="lotto">로또 번호</button>
+            <button class="tab-btn" data-game="reaction">반응속도 게임</button>
+            <button class="tab-btn" data-game="click-survival">클릭 서바이벌</button>
+            <button class="tab-btn" data-game="typing">타이핑 게임</button>
+            <button class="tab-btn" data-game="numsum">숫자 합치기</button>
+            <button class="tab-btn" data-game="sliding">퍼즐 슬라이딩</button>
           </div>
         </div>
       </div>
@@ -151,6 +156,41 @@
             <div class="game-card-body">
               <h3>로또 번호</h3>
               <p>오늘의 행운 번호를 뽑아봐요</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="reaction">
+            <div class="game-card-thumb thumb-reaction"></div>
+            <div class="game-card-body">
+              <h3>반응속도 게임</h3>
+              <p>신호를 보면 바로 클릭! 나의 반응속도는?</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="click-survival">
+            <div class="game-card-thumb thumb-click-survival"></div>
+            <div class="game-card-body">
+              <h3>클릭 서바이벌</h3>
+              <p>나타나는 원을 놓치지 마세요!</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="typing">
+            <div class="game-card-thumb thumb-typing"></div>
+            <div class="game-card-body">
+              <h3>타이핑 게임</h3>
+              <p>단어가 사라지기 전에 빠르게 타이핑!</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="numsum">
+            <div class="game-card-thumb thumb-numsum"></div>
+            <div class="game-card-body">
+              <h3>숫자 합치기</h3>
+              <p>드래그해서 합이 10이 되는 숫자를 선택!</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="sliding">
+            <div class="game-card-thumb thumb-sliding"></div>
+            <div class="game-card-body">
+              <h3>퍼즐 슬라이딩</h3>
+              <p>숫자를 순서대로 맞춰봐요</p>
             </div>
           </div>
         </div>
@@ -609,6 +649,107 @@
         <div class="comment-list"></div>
       </div>
     </section>
+    <!-- 반응속도 게임 -->
+    <section id="reaction-game" class="game-section">
+      <h3>반응속도 게임</h3>
+      <p class="section-desc">초록불이 켜지면 최대한 빠르게 클릭! 5번의 평균 반응속도를 겨뤄봐요.</p>
+      <div id="reaction-box" class="reaction-box state-idle">
+        <span id="reaction-msg">클릭해서 시작</span>
+      </div>
+      <div id="reaction-rounds" class="reaction-rounds"></div>
+      <div class="leaderboard-section">
+        <h4 class="leaderboard-title">🏆 명예의 전당 <span class="leaderboard-unit">(ms, 낮을수록 빨라요)</span></h4>
+        <div class="leaderboard-list" id="reaction-leaderboard"></div>
+      </div>
+    </section>
+
+    <!-- 클릭 서바이벌 -->
+    <section id="click-survival-game" class="game-section">
+      <h3>클릭 서바이벌</h3>
+      <p class="section-desc">나타나는 원을 빠르게 클릭! 3번 놓치면 게임 오버.</p>
+      <div class="game-hud">
+        <span>점수: <strong id="survival-score">0</strong></span>
+        <span>❌ <strong id="survival-miss">0</strong>/3</span>
+        <span>⏱ <strong id="survival-timer">60</strong>s</span>
+      </div>
+      <div id="survival-area" class="arcade-area">
+        <div id="survival-overlay" class="arcade-overlay">
+          <button id="survival-start" class="primary-btn" style="width:auto;margin:0">게임 시작</button>
+        </div>
+      </div>
+      <div class="leaderboard-section">
+        <h4 class="leaderboard-title">🏆 명예의 전당</h4>
+        <div class="leaderboard-list" id="click-survival-leaderboard"></div>
+      </div>
+    </section>
+
+    <!-- 타이핑 게임 -->
+    <section id="typing-game" class="game-section">
+      <h3>타이핑 게임</h3>
+      <p class="section-desc">단어가 화면 아래로 떨어지기 전에 타이핑해서 없애세요! 3번 놓치면 게임 오버.</p>
+      <div class="game-hud">
+        <span>점수: <strong id="typing-score">0</strong></span>
+        <span>❤️ <strong id="typing-lives">3</strong></span>
+        <span>⏱ <strong id="typing-timer">60</strong>s</span>
+      </div>
+      <div id="typing-area" class="arcade-area">
+        <div id="typing-overlay" class="arcade-overlay">
+          <button id="typing-start" class="primary-btn" style="width:auto;margin:0">게임 시작</button>
+        </div>
+      </div>
+      <input type="text" id="typing-input" class="typing-input" placeholder="여기에 타이핑..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" disabled>
+      <div class="leaderboard-section">
+        <h4 class="leaderboard-title">🏆 명예의 전당</h4>
+        <div class="leaderboard-list" id="typing-leaderboard"></div>
+      </div>
+    </section>
+
+    <!-- 숫자 합치기 -->
+    <section id="numsum-game" class="game-section">
+      <h3>숫자 합치기</h3>
+      <p class="section-desc">드래그해서 합이 10이 되는 숫자를 선택하세요! 90초 안에 최대한 많이!</p>
+      <div class="game-hud">
+        <span>점수: <strong id="numsum-score">0</strong></span>
+        <span>⏱ <strong id="numsum-timer">90</strong>s</span>
+        <button id="numsum-start" class="secondary-btn">게임 시작</button>
+      </div>
+      <div id="numsum-sum-display" class="numsum-sum-display"></div>
+      <div id="numsum-grid" class="numsum-grid"></div>
+      <div class="leaderboard-section">
+        <h4 class="leaderboard-title">🏆 명예의 전당</h4>
+        <div class="leaderboard-list" id="numsum-leaderboard"></div>
+      </div>
+    </section>
+
+    <!-- 퍼즐 슬라이딩 -->
+    <section id="sliding-game" class="game-section">
+      <h3>퍼즐 슬라이딩</h3>
+      <p class="section-desc">숫자를 1부터 15까지 순서대로 맞춰보세요. 빨리 풀수록 TOP에 가까워져요!</p>
+      <div class="game-hud">
+        <span>⏱ <strong id="sliding-timer">0</strong>s</span>
+        <span>이동: <strong id="sliding-moves">0</strong></span>
+        <button id="sliding-start" class="secondary-btn">새 게임</button>
+      </div>
+      <div id="sliding-board" class="sliding-board"></div>
+      <div class="leaderboard-section">
+        <h4 class="leaderboard-title">🏆 명예의 전당 <span class="leaderboard-unit">(초, 낮을수록 빨라요)</span></h4>
+        <div class="leaderboard-list" id="sliding-leaderboard"></div>
+      </div>
+    </section>
+
+    <!-- 점수 등록 모달 -->
+    <div id="score-modal" class="score-modal-overlay">
+      <div class="score-modal-box">
+        <h3>🎉 TOP 10 진입!</h3>
+        <p id="score-modal-desc"></p>
+        <input type="text" id="score-modal-nickname" placeholder="닉네임 입력 (최대 10자)" maxlength="10">
+        <div class="score-modal-btns">
+          <button id="score-modal-confirm" class="primary-btn" style="width:auto;margin:0">등록하기</button>
+          <button id="score-modal-skip" class="secondary-btn">건너뛰기</button>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <footer>

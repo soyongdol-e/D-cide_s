@@ -1,3 +1,103 @@
+// ==================== 리더보드 공통 ====================
+const LB_CONFIG = {
+  'reaction':       { lowerIsBetter: true,  unit: 'ms' },
+  'click-survival': { lowerIsBetter: false, unit: '점' },
+  'typing':         { lowerIsBetter: false, unit: '점' },
+  'numsum':         { lowerIsBetter: false, unit: '점' },
+  'sliding':        { lowerIsBetter: true,  unit: '초' },
+};
+
+async function loadLeaderboard(gameId, containerId) {
+  const cfg = LB_CONFIG[gameId];
+  if (!cfg) return;
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '<div class="leaderboard-empty">로딩 중...</div>';
+  try {
+    const snapshot = await db.collection('leaderboard')
+      .where('gameId', '==', gameId)
+      .orderBy('score', cfg.lowerIsBetter ? 'asc' : 'desc')
+      .limit(10).get();
+    if (snapshot.empty) {
+      container.innerHTML = '<div class="leaderboard-empty">아직 기록이 없어요. 첫 번째 주인공이 되어보세요!</div>';
+      return;
+    }
+    container.innerHTML = '';
+    let rank = 1;
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const item = document.createElement('div');
+      item.className = 'leaderboard-item';
+      const medals = ['🥇', '🥈', '🥉'];
+      const rankHtml = rank <= 3
+        ? `<div class="leaderboard-rank rank-${rank}">${medals[rank - 1]}</div>`
+        : `<div class="leaderboard-rank rank-other">${rank}</div>`;
+      item.innerHTML = `${rankHtml}
+        <div class="leaderboard-nickname">${escapeHtml(d.nickname)}</div>
+        <div class="leaderboard-score">${d.score}${cfg.unit}</div>`;
+      container.appendChild(item);
+      rank++;
+    });
+  } catch (e) {
+    container.innerHTML = '<div class="leaderboard-empty">기록을 불러올 수 없습니다.</div>';
+  }
+}
+
+async function checkLeaderboardQualify(gameId, score) {
+  const cfg = LB_CONFIG[gameId];
+  if (!cfg) return false;
+  try {
+    const snapshot = await db.collection('leaderboard')
+      .where('gameId', '==', gameId)
+      .orderBy('score', cfg.lowerIsBetter ? 'asc' : 'desc')
+      .limit(10).get();
+    if (snapshot.size < 10) return true;
+    const scores = [];
+    snapshot.forEach(doc => scores.push(doc.data().score));
+    const worst = scores[scores.length - 1];
+    return cfg.lowerIsBetter ? score < worst : score > worst;
+  } catch (e) { return false; }
+}
+
+let _scoreModalResolve = null;
+
+function showScoreModal(gameId, score) {
+  const cfg = LB_CONFIG[gameId];
+  const modal = document.getElementById('score-modal');
+  document.getElementById('score-modal-desc').textContent =
+    `${score}${cfg.unit} 점수로 TOP 10에 진입했어요! 닉네임을 입력해주세요.`;
+  document.getElementById('score-modal-nickname').value = '';
+  modal.style.display = 'flex';
+
+  return new Promise(resolve => {
+    _scoreModalResolve = resolve;
+  });
+}
+
+document.getElementById('score-modal-confirm').addEventListener('click', async () => {
+  const nickname = document.getElementById('score-modal-nickname').value.trim();
+  if (!nickname) { alert('닉네임을 입력해주세요!'); return; }
+  document.getElementById('score-modal').style.display = 'none';
+  if (_scoreModalResolve) { _scoreModalResolve(nickname); _scoreModalResolve = null; }
+});
+
+document.getElementById('score-modal-skip').addEventListener('click', () => {
+  document.getElementById('score-modal').style.display = 'none';
+  if (_scoreModalResolve) { _scoreModalResolve(null); _scoreModalResolve = null; }
+});
+
+async function handleGameEnd(gameId, score) {
+  const qualifies = await checkLeaderboardQualify(gameId, score);
+  if (!qualifies) return;
+  const nickname = await showScoreModal(gameId, score);
+  if (!nickname) return;
+  await db.collection('leaderboard').add({
+    gameId, nickname, score,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  loadLeaderboard(gameId, `${gameId}-leaderboard`);
+}
+
 // ==================== 홈/게임 뷰 전환 ====================
 function showGame(gameId) {
   document.getElementById('home-view').classList.remove('active');
@@ -19,6 +119,10 @@ function showGame(gameId) {
   document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
 
   if (gameId === 'petal') startPetalGame();
+  const lbGames = ['reaction', 'click-survival', 'typing', 'numsum', 'sliding'];
+  if (lbGames.includes(gameId)) {
+    loadLeaderboard(gameId, `${gameId}-leaderboard`);
+  }
   loadComments(gameId);
 }
 
@@ -1910,3 +2014,578 @@ document.getElementById('team-restart').addEventListener('click', () => {
     leaderNames: []
   };
 });
+
+// ==================== 반응속도 게임 ====================
+(function () {
+  const ROUNDS = 5;
+  let state = 'idle'; // idle | waiting | go | early
+  let timer = null;
+  let startTime = 0;
+  let results = [];
+
+  const box = document.getElementById('reaction-box');
+  const msg = document.getElementById('reaction-msg');
+  const roundsEl = document.getElementById('reaction-rounds');
+
+  function setState(s) {
+    state = s;
+    box.className = 'reaction-box state-' + s;
+  }
+
+  function scheduleGo() {
+    setState('waiting');
+    msg.textContent = '초록불을 기다려요...';
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      setState('go');
+      msg.textContent = '지금 클릭!';
+      startTime = Date.now();
+    }, 1000 + Math.random() * 3000);
+  }
+
+  function finish() {
+    const avg = Math.round(results.reduce((a, b) => a + b, 0) / results.length);
+    setState('idle');
+    msg.textContent = `평균 ${avg}ms — 클릭해서 다시`;
+    handleGameEnd('reaction', avg);
+  }
+
+  box.addEventListener('click', () => {
+    if (state === 'idle') {
+      results = [];
+      roundsEl.innerHTML = '';
+      scheduleGo();
+    } else if (state === 'waiting') {
+      clearTimeout(timer);
+      setState('early');
+      msg.textContent = '너무 일찍! 잠깐 기다려요...';
+      timer = setTimeout(scheduleGo, 1500);
+    } else if (state === 'go') {
+      const ms = Date.now() - startTime;
+      results.push(ms);
+      const badge = document.createElement('span');
+      badge.className = 'reaction-badge';
+      badge.textContent = `${results.length}회: ${ms}ms`;
+      roundsEl.appendChild(badge);
+      if (results.length < ROUNDS) {
+        scheduleGo();
+      } else {
+        finish();
+      }
+    }
+  });
+})();
+
+// ==================== 클릭 서바이벌 ====================
+(function () {
+  let score = 0, miss = 0, timeLeft = 60;
+  let running = false;
+  let spawnTimer = null, countTimer = null;
+
+  const area = document.getElementById('survival-area');
+  const overlay = document.getElementById('survival-overlay');
+  const startBtn = document.getElementById('survival-start');
+  const scoreEl = document.getElementById('survival-score');
+  const missEl = document.getElementById('survival-miss');
+  const timerEl = document.getElementById('survival-timer');
+
+  function reset() {
+    score = 0; miss = 0; timeLeft = 60;
+    scoreEl.textContent = '0';
+    missEl.textContent = '0';
+    timerEl.textContent = '60';
+    area.querySelectorAll('.survival-circle').forEach(c => c.remove());
+  }
+
+  function startGame() {
+    reset();
+    overlay.style.display = 'none';
+    running = true;
+    spawnLoop();
+    countTimer = setInterval(tick, 1000);
+  }
+
+  function tick() {
+    timeLeft--;
+    timerEl.textContent = timeLeft;
+    if (timeLeft <= 0) endGame();
+  }
+
+  function spawnLoop() {
+    if (!running) return;
+    spawnCircle();
+    spawnTimer = setTimeout(spawnLoop, 700 + Math.random() * 600);
+  }
+
+  function spawnCircle() {
+    const size = 44 + Math.floor(Math.random() * 20);
+    const x = Math.random() * (area.offsetWidth - size - 4);
+    const y = Math.random() * (area.offsetHeight - size - 4);
+    const circle = document.createElement('div');
+    circle.className = 'survival-circle';
+    circle.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
+    area.appendChild(circle);
+
+    const timeout = setTimeout(() => {
+      if (circle.parentNode) {
+        circle.remove();
+        miss++;
+        missEl.textContent = miss;
+        if (miss >= 3 && running) endGame();
+      }
+    }, 1500);
+
+    circle.addEventListener('click', () => {
+      clearTimeout(timeout);
+      circle.remove();
+      score += 10;
+      scoreEl.textContent = score;
+    });
+  }
+
+  function endGame() {
+    running = false;
+    clearTimeout(spawnTimer);
+    clearInterval(countTimer);
+    area.querySelectorAll('.survival-circle').forEach(c => c.remove());
+    overlay.innerHTML = `<p style="font-size:1.2rem;margin-bottom:1rem">게임 오버!<br>점수: <strong>${score}점</strong></p>
+      <button class="surv-restart primary-btn" style="width:auto;margin:0">다시 하기</button>`;
+    overlay.style.display = 'flex';
+    overlay.querySelector('.surv-restart').addEventListener('click', startGame);
+    handleGameEnd('click-survival', score);
+  }
+
+  startBtn.addEventListener('click', startGame);
+})();
+
+// ==================== 타이핑 게임 ====================
+(function () {
+  const WORDS = [
+    '사과', '바나나', '딸기', '포도', '수박', '키위', '레몬', '망고', '복숭아', '체리',
+    '고양이', '강아지', '토끼', '햄스터', '거북이', '앵무새', '금붕어', '다람쥐',
+    '행복', '사랑', '웃음', '희망', '감사', '여행', '음악', '영화', '독서', '요리',
+    '컴퓨터', '스마트폰', '자동차', '비행기', '기차', '자전거', '오토바이',
+    '봄바람', '여름밤', '가을빛', '겨울눈', '무지개', '구름', '바다', '하늘',
+    '커피', '케이크', '피자', '햄버거', '라면', '김밥', '떡볶이', '치킨'
+  ];
+
+  let score = 0, lives = 3, timeLeft = 60;
+  let running = false;
+  let spawnTimer = null, countTimer = null;
+  let wordEls = [];
+
+  const area = document.getElementById('typing-area');
+  const overlay = document.getElementById('typing-overlay');
+  const startBtn = document.getElementById('typing-start');
+  const input = document.getElementById('typing-input');
+  const scoreEl = document.getElementById('typing-score');
+  const livesEl = document.getElementById('typing-lives');
+  const timerEl = document.getElementById('typing-timer');
+
+  function reset() {
+    score = 0; lives = 3; timeLeft = 60;
+    scoreEl.textContent = '0';
+    livesEl.textContent = '3';
+    timerEl.textContent = '60';
+    area.querySelectorAll('.typing-word').forEach(w => w.remove());
+    wordEls = [];
+    input.value = '';
+    input.disabled = false;
+  }
+
+  function startGame() {
+    reset();
+    overlay.style.display = 'none';
+    running = true;
+    scheduleSpawn();
+    countTimer = setInterval(tick, 1000);
+    input.focus();
+  }
+
+  function tick() {
+    timeLeft--;
+    timerEl.textContent = timeLeft;
+    if (timeLeft <= 0) endGame();
+  }
+
+  function scheduleSpawn() {
+    if (!running) return;
+    spawnWord();
+    spawnTimer = setTimeout(scheduleSpawn, 1200 + Math.random() * 800);
+  }
+
+  function spawnWord() {
+    const text = WORDS[Math.floor(Math.random() * WORDS.length)];
+    const x = 10 + Math.random() * (area.offsetWidth - 90);
+    const el = document.createElement('div');
+    el.className = 'typing-word';
+    el.textContent = text;
+    el.style.left = x + 'px';
+    el.style.top = '0px';
+    el._text = text;
+    area.appendChild(el);
+
+    const areaH = area.offsetHeight;
+    const duration = 4500 + Math.random() * 2000;
+    const startT = Date.now();
+
+    function fall() {
+      if (!el.parentNode) return;
+      const progress = (Date.now() - startT) / duration;
+      el.style.top = (progress * (areaH - 36)) + 'px';
+      if (progress >= 1) {
+        el.remove();
+        const idx = wordEls.indexOf(el);
+        if (idx !== -1) wordEls.splice(idx, 1);
+        if (!running) return;
+        lives--;
+        livesEl.textContent = lives;
+        if (lives <= 0) endGame();
+        return;
+      }
+      requestAnimationFrame(fall);
+    }
+    requestAnimationFrame(fall);
+    wordEls.push(el);
+  }
+
+  input.addEventListener('input', () => {
+    const val = input.value.trim();
+    const idx = wordEls.findIndex(w => w._text === val);
+    if (idx !== -1) {
+      wordEls[idx].remove();
+      wordEls.splice(idx, 1);
+      score += 10;
+      scoreEl.textContent = score;
+      input.value = '';
+    }
+  });
+
+  function endGame() {
+    running = false;
+    clearTimeout(spawnTimer);
+    clearInterval(countTimer);
+    input.disabled = true;
+    area.querySelectorAll('.typing-word').forEach(w => w.remove());
+    wordEls = [];
+    overlay.innerHTML = `<p style="font-size:1.2rem;margin-bottom:1rem">게임 종료!<br>점수: <strong>${score}점</strong></p>
+      <button class="typing-restart primary-btn" style="width:auto;margin:0">다시 하기</button>`;
+    overlay.style.display = 'flex';
+    overlay.querySelector('.typing-restart').addEventListener('click', startGame);
+    handleGameEnd('typing', score);
+  }
+
+  startBtn.addEventListener('click', startGame);
+})();
+
+// ==================== 숫자 합치기 ====================
+(function () {
+  const COLS = 9, ROWS = 6;
+  let grid = [], score = 0, timeLeft = 90;
+  let running = false;
+  let countTimer = null;
+  let dragStart = null, dragEnd = null, isDragging = false;
+
+  const gridEl = document.getElementById('numsum-grid');
+  const scoreEl = document.getElementById('numsum-score');
+  const timerEl = document.getElementById('numsum-timer');
+  const startBtn = document.getElementById('numsum-start');
+  const sumDisplay = document.getElementById('numsum-sum-display');
+
+  function genGrid() {
+    grid = [];
+    for (let r = 0; r < ROWS; r++) {
+      const row = [];
+      for (let c = 0; c < COLS; c++) {
+        row.push(Math.floor(Math.random() * 9) + 1);
+      }
+      grid.push(row);
+    }
+  }
+
+  function renderGrid() {
+    gridEl.innerHTML = '';
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'numsum-cell';
+        cell.dataset.r = r;
+        cell.dataset.c = c;
+        const val = grid[r][c];
+        cell.textContent = val === 0 ? '' : val;
+        if (val === 0) cell.classList.add('cleared');
+        gridEl.appendChild(cell);
+      }
+    }
+  }
+
+  function getCell(r, c) {
+    return gridEl.querySelector(`.numsum-cell[data-r="${r}"][data-c="${c}"]`);
+  }
+
+  function getCellsInRect(r1, c1, r2, c2) {
+    const minR = Math.min(r1, r2), maxR = Math.max(r1, r2);
+    const minC = Math.min(c1, c2), maxC = Math.max(c1, c2);
+    const cells = [];
+    for (let r = minR; r <= maxR; r++) {
+      for (let c = minC; c <= maxC; c++) {
+        if (grid[r][c] !== 0) cells.push({ r, c });
+      }
+    }
+    return cells;
+  }
+
+  function sumCells(cells) {
+    return cells.reduce((s, { r, c }) => s + grid[r][c], 0);
+  }
+
+  function clearSelectionStyle() {
+    gridEl.querySelectorAll('.numsum-cell.selected, .numsum-cell.error').forEach(el => {
+      el.classList.remove('selected', 'error');
+    });
+    sumDisplay.textContent = '';
+  }
+
+  function updateSelection(r1, c1, r2, c2) {
+    clearSelectionStyle();
+    const cells = getCellsInRect(r1, c1, r2, c2);
+    const sum = sumCells(cells);
+    cells.forEach(({ r, c }) => getCell(r, c).classList.add('selected'));
+    if (cells.length > 0) sumDisplay.textContent = `선택 합계: ${sum}`;
+  }
+
+  function tryConfirm(r1, c1, r2, c2) {
+    const cells = getCellsInRect(r1, c1, r2, c2);
+    const sum = sumCells(cells);
+    if (sum === 10 && cells.length > 0) {
+      cells.forEach(({ r, c }) => {
+        grid[r][c] = 0;
+        const cell = getCell(r, c);
+        cell.classList.remove('selected');
+        cell.classList.add('cleared');
+        cell.textContent = '';
+      });
+      score += cells.length;
+      scoreEl.textContent = score;
+    } else if (cells.length > 0) {
+      cells.forEach(({ r, c }) => {
+        const cell = getCell(r, c);
+        cell.classList.remove('selected');
+        cell.classList.add('error');
+      });
+      setTimeout(() => {
+        cells.forEach(({ r, c }) => {
+          const cell = getCell(r, c);
+          if (cell) cell.classList.remove('error');
+        });
+      }, 400);
+    }
+    sumDisplay.textContent = '';
+  }
+
+  function cellFromPoint(x, y) {
+    const el = document.elementFromPoint(x, y);
+    if (!el || !el.classList.contains('numsum-cell')) return null;
+    return { r: parseInt(el.dataset.r), c: parseInt(el.dataset.c) };
+  }
+
+  gridEl.addEventListener('mousedown', (e) => {
+    if (!running) return;
+    const cell = cellFromPoint(e.clientX, e.clientY);
+    if (!cell) return;
+    isDragging = true;
+    dragStart = cell; dragEnd = cell;
+    updateSelection(dragStart.r, dragStart.c, dragEnd.r, dragEnd.c);
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging || !running) return;
+    const cell = cellFromPoint(e.clientX, e.clientY);
+    if (!cell) return;
+    if (cell.r !== dragEnd.r || cell.c !== dragEnd.c) {
+      dragEnd = cell;
+      updateSelection(dragStart.r, dragStart.c, dragEnd.r, dragEnd.c);
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!isDragging || !running) return;
+    isDragging = false;
+    tryConfirm(dragStart.r, dragStart.c, dragEnd.r, dragEnd.c);
+    dragStart = null; dragEnd = null;
+  });
+
+  gridEl.addEventListener('touchstart', (e) => {
+    if (!running) return;
+    const t = e.touches[0];
+    const cell = cellFromPoint(t.clientX, t.clientY);
+    if (!cell) return;
+    isDragging = true;
+    dragStart = cell; dragEnd = cell;
+    updateSelection(dragStart.r, dragStart.c, dragEnd.r, dragEnd.c);
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging || !running) return;
+    const t = e.touches[0];
+    const cell = cellFromPoint(t.clientX, t.clientY);
+    if (!cell) return;
+    if (cell.r !== dragEnd.r || cell.c !== dragEnd.c) {
+      dragEnd = cell;
+      updateSelection(dragStart.r, dragStart.c, dragEnd.r, dragEnd.c);
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => {
+    if (!isDragging || !running) return;
+    isDragging = false;
+    tryConfirm(dragStart.r, dragStart.c, dragEnd.r, dragEnd.c);
+    dragStart = null; dragEnd = null;
+  });
+
+  function tick() {
+    timeLeft--;
+    timerEl.textContent = timeLeft;
+    if (timeLeft <= 0) endGame();
+  }
+
+  function startGame() {
+    score = 0; timeLeft = 90;
+    scoreEl.textContent = '0';
+    timerEl.textContent = '90';
+    sumDisplay.textContent = '';
+    genGrid();
+    renderGrid();
+    clearInterval(countTimer);
+    running = true;
+    countTimer = setInterval(tick, 1000);
+  }
+
+  function endGame() {
+    running = false;
+    clearInterval(countTimer);
+    clearSelectionStyle();
+    sumDisplay.textContent = `게임 종료! 최종 점수: ${score}점`;
+    handleGameEnd('numsum', score);
+  }
+
+  startBtn.addEventListener('click', startGame);
+
+  // Initial render (before game starts)
+  genGrid();
+  renderGrid();
+})();
+
+// ==================== 퍼즐 슬라이딩 ====================
+(function () {
+  const SIZE = 4;
+  let tiles = [];
+  let moves = 0, timeElapsed = 0;
+  let running = false;
+  let timerInterval = null;
+
+  const boardEl = document.getElementById('sliding-board');
+  const timerEl = document.getElementById('sliding-timer');
+  const movesEl = document.getElementById('sliding-moves');
+  const startBtn = document.getElementById('sliding-start');
+
+  function initBoard() {
+    tiles = Array.from({ length: SIZE * SIZE }, (_, i) => i);
+    shuffleBoard();
+    moves = 0; timeElapsed = 0;
+    movesEl.textContent = '0';
+    timerEl.textContent = '0';
+    render();
+  }
+
+  function shuffleBoard() {
+    let eR = SIZE - 1, eC = SIZE - 1;
+    for (let i = 0; i < 500; i++) {
+      const dirs = [];
+      if (eR > 0)      dirs.push([eR - 1, eC]);
+      if (eR < SIZE-1) dirs.push([eR + 1, eC]);
+      if (eC > 0)      dirs.push([eR, eC - 1]);
+      if (eC < SIZE-1) dirs.push([eR, eC + 1]);
+      const [nr, nc] = dirs[Math.floor(Math.random() * dirs.length)];
+      const fromIdx = nr * SIZE + nc;
+      const toIdx = eR * SIZE + eC;
+      [tiles[fromIdx], tiles[toIdx]] = [tiles[toIdx], tiles[fromIdx]];
+      eR = nr; eC = nc;
+    }
+  }
+
+  function findEmpty() {
+    const idx = tiles.indexOf(0);
+    return { r: Math.floor(idx / SIZE), c: idx % SIZE };
+  }
+
+  function render() {
+    boardEl.innerHTML = '';
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        const val = tiles[r * SIZE + c];
+        const tile = document.createElement('div');
+        tile.className = val === 0 ? 'sliding-tile empty' : 'sliding-tile';
+        if (val !== 0) {
+          tile.textContent = val;
+          tile.addEventListener('click', () => tryMove(r, c));
+        }
+        boardEl.appendChild(tile);
+      }
+    }
+  }
+
+  function tryMove(r, c) {
+    if (!running) return;
+    const { r: er, c: ec } = findEmpty();
+    const dr = Math.abs(r - er), dc = Math.abs(c - ec);
+    if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
+      [tiles[r * SIZE + c], tiles[er * SIZE + ec]] = [tiles[er * SIZE + ec], tiles[r * SIZE + c]];
+      moves++;
+      movesEl.textContent = moves;
+      render();
+      if (checkSolved()) endGame();
+    }
+  }
+
+  function checkSolved() {
+    for (let i = 0; i < SIZE * SIZE - 1; i++) {
+      if (tiles[i] !== i + 1) return false;
+    }
+    return tiles[SIZE * SIZE - 1] === 0;
+  }
+
+  function startGame() {
+    clearInterval(timerInterval);
+    const resultEl = document.getElementById('sliding-result');
+    if (resultEl) resultEl.remove();
+    initBoard();
+    running = true;
+    timerInterval = setInterval(() => {
+      timeElapsed++;
+      timerEl.textContent = timeElapsed;
+    }, 1000);
+  }
+
+  function endGame() {
+    running = false;
+    clearInterval(timerInterval);
+    let resultEl = document.getElementById('sliding-result');
+    if (!resultEl) {
+      resultEl = document.createElement('div');
+      resultEl.id = 'sliding-result';
+      resultEl.style.cssText = 'text-align:center;margin:1rem 0;padding:1rem;background:var(--bg-card);border-radius:12px;';
+      boardEl.after(resultEl);
+    }
+    resultEl.innerHTML = `<p style="font-size:1.2rem;font-weight:bold">퍼즐 완성! 🎉</p>
+      <p>${timeElapsed}초 / ${moves}번 이동</p>`;
+    handleGameEnd('sliding', timeElapsed);
+  }
+
+  startBtn.addEventListener('click', startGame);
+
+  // Show initial board
+  initBoard();
+})();

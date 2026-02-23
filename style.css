@@ -314,8 +314,13 @@ main {
 .thumb-ladder    { background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%); }
 .thumb-team      { background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%); }
 .thumb-order     { background: linear-gradient(135deg, #F97316 0%, #EAB308 100%); }
-.thumb-balance   { background: linear-gradient(135deg, #374151 0%, #111827 100%); }
-.thumb-lotto     { background: linear-gradient(135deg, #EAB308 0%, #F97316 100%); }
+.thumb-balance        { background: linear-gradient(135deg, #374151 0%, #111827 100%); }
+.thumb-lotto          { background: linear-gradient(135deg, #EAB308 0%, #F97316 100%); }
+.thumb-reaction       { background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); }
+.thumb-click-survival { background: linear-gradient(135deg, #EC4899 0%, #F43F5E 100%); }
+.thumb-typing         { background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); }
+.thumb-numsum         { background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%); }
+.thumb-sliding        { background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); }
 
 .game-card-body {
   padding: var(--space-md);
@@ -1892,6 +1897,365 @@ footer {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
   color: var(--text-primary);
+}
+
+/* ==================== Leaderboard ==================== */
+.leaderboard-section {
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--border-light);
+}
+
+.leaderboard-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+}
+
+.leaderboard-unit {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  font-weight: var(--font-weight-normal);
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+}
+
+.leaderboard-rank {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500); color: white; }
+.rank-2 { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); color: white; }
+.rank-3 { background: linear-gradient(135deg, #CD7F32, #A0522D); color: white; }
+.rank-other { background: var(--bg-secondary); color: var(--text-tertiary); }
+
+.leaderboard-nickname {
+  flex: 1;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.leaderboard-score {
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+
+.leaderboard-empty {
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+  padding: var(--space-xl);
+}
+
+/* Score Modal */
+.score-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-modal-box {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  box-shadow: var(--shadow-xl);
+}
+
+.score-modal-box h3 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-sm);
+}
+
+.score-modal-box p {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+  font-size: var(--font-size-sm);
+}
+
+.score-modal-box input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-lg);
+  font-family: var(--font-family);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.score-modal-box input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.score-modal-btns {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+/* ==================== Arcade Games Common ==================== */
+.game-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-md);
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.arcade-area {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: var(--space-lg);
+}
+
+.arcade-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.92);
+  z-index: 10;
+  border-radius: var(--radius-xl);
+}
+
+.arcade-end-box {
+  text-align: center;
+}
+
+.arcade-end-box h3 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-sm);
+}
+
+.arcade-end-box p {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+/* ==================== 반응속도 게임 ==================== */
+.reaction-box {
+  width: 100%;
+  height: 200px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: var(--space-lg);
+  transition: background var(--transition-fast);
+}
+
+.reaction-box.state-idle    { background: var(--bg-tertiary); }
+.reaction-box.state-waiting { background: #EF4444; }
+.reaction-box.state-go      { background: #22C55E; }
+.reaction-box.state-early   { background: #F59E0B; }
+
+#reaction-msg {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: white;
+}
+
+.reaction-box.state-idle #reaction-msg { color: var(--text-tertiary); }
+
+.reaction-rounds {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.reaction-badge {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background: var(--bg-tertiary);
+  color: var(--text-tertiary);
+}
+
+.reaction-badge.done {
+  background: var(--primary);
+  color: white;
+}
+
+/* ==================== 클릭 서바이벌 ==================== */
+.survival-circle {
+  position: absolute;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  color: white;
+  user-select: none;
+  transition: transform 0.1s;
+  font-size: var(--font-size-lg);
+}
+
+.survival-circle:hover { transform: scale(1.08); }
+
+/* ==================== 타이핑 게임 ==================== */
+.typing-word {
+  position: absolute;
+  padding: var(--space-xs) var(--space-md);
+  background: var(--primary);
+  color: white;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: background 0.2s;
+}
+
+.typing-word.matched { background: var(--success); }
+
+.typing-input {
+  width: 100%;
+  padding: var(--space-md);
+  font-size: var(--font-size-xl);
+  font-family: var(--font-family);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  margin-bottom: var(--space-lg);
+  transition: all var(--transition-fast);
+}
+
+.typing-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* ==================== 숫자 합치기 ==================== */
+.numsum-sum-display {
+  text-align: center;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  min-height: 32px;
+  margin-bottom: var(--space-sm);
+}
+
+.numsum-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 4px;
+  margin-bottom: var(--space-lg);
+  user-select: none;
+}
+
+.numsum-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.1s;
+  border: 2px solid transparent;
+}
+
+.numsum-cell.selected {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.numsum-cell.cleared {
+  background: transparent;
+  color: transparent;
+  pointer-events: none;
+  border-color: transparent;
+}
+
+.numsum-cell.error {
+  background: rgba(255, 59, 48, 0.12);
+  border-color: var(--error);
+  color: var(--error);
+}
+
+/* ==================== 퍼즐 슬라이딩 ==================== */
+.sliding-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  max-width: 300px;
+  margin: var(--space-md) auto var(--space-lg);
+}
+
+.sliding-tile {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transition-fast);
+}
+
+.sliding-tile:hover:not(.empty) {
+  background: var(--primary-hover);
+  transform: scale(1.04);
+}
+
+.sliding-tile.empty {
+  background: var(--bg-tertiary);
+  cursor: default;
 }
 
 /* ==================== Responsive ==================== */
