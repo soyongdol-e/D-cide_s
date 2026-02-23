@@ -16,29 +16,32 @@ async function loadLeaderboard(gameId, containerId) {
   try {
     const snapshot = await db.collection('leaderboard')
       .where('gameId', '==', gameId)
-      .orderBy('score', cfg.lowerIsBetter ? 'asc' : 'desc')
-      .limit(10).get();
+      .get();
     if (snapshot.empty) {
       container.innerHTML = '<div class="leaderboard-empty">아직 기록이 없어요. 첫 번째 주인공이 되어보세요!</div>';
       return;
     }
+    let docs = [];
+    snapshot.forEach(doc => docs.push(doc.data()));
+    docs.sort((a, b) => cfg.lowerIsBetter ? a.score - b.score : b.score - a.score);
+    docs = docs.slice(0, 10);
+
     container.innerHTML = '';
-    let rank = 1;
-    snapshot.forEach(doc => {
-      const d = doc.data();
+    const medals = ['🥇', '🥈', '🥉'];
+    docs.forEach((d, i) => {
+      const rank = i + 1;
       const item = document.createElement('div');
       item.className = 'leaderboard-item';
-      const medals = ['🥇', '🥈', '🥉'];
       const rankHtml = rank <= 3
-        ? `<div class="leaderboard-rank rank-${rank}">${medals[rank - 1]}</div>`
+        ? `<div class="leaderboard-rank rank-${rank}">${medals[i]}</div>`
         : `<div class="leaderboard-rank rank-other">${rank}</div>`;
       item.innerHTML = `${rankHtml}
         <div class="leaderboard-nickname">${escapeHtml(d.nickname)}</div>
         <div class="leaderboard-score">${d.score}${cfg.unit}</div>`;
       container.appendChild(item);
-      rank++;
     });
   } catch (e) {
+    console.error('리더보드 로드 에러:', e);
     container.innerHTML = '<div class="leaderboard-empty">기록을 불러올 수 없습니다.</div>';
   }
 }
@@ -49,14 +52,17 @@ async function checkLeaderboardQualify(gameId, score) {
   try {
     const snapshot = await db.collection('leaderboard')
       .where('gameId', '==', gameId)
-      .orderBy('score', cfg.lowerIsBetter ? 'asc' : 'desc')
-      .limit(10).get();
+      .get();
     if (snapshot.size < 10) return true;
     const scores = [];
     snapshot.forEach(doc => scores.push(doc.data().score));
-    const worst = scores[scores.length - 1];
+    scores.sort((a, b) => cfg.lowerIsBetter ? a - b : b - a);
+    const worst = scores[9];
     return cfg.lowerIsBetter ? score < worst : score > worst;
-  } catch (e) { return false; }
+  } catch (e) {
+    console.error('리더보드 자격 확인 에러:', e);
+    return false;
+  }
 }
 
 let _scoreModalResolve = null;
