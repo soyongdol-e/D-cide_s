@@ -281,12 +281,9 @@ main {
 /* Game Gallery Grid */
 .game-gallery {
   display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--space-md);
 }
-
-.game-gallery.cols-4 { grid-template-columns: repeat(4, 1fr); }
-.game-gallery.cols-3 { grid-template-columns: repeat(3, 1fr); }
-.game-gallery.cols-2 { grid-template-columns: repeat(2, 1fr); }
 
 /* Game Card */
 .game-card {
@@ -1903,12 +1900,7 @@ footer {
     font-size: var(--font-size-2xl);
   }
 
-  .game-gallery.cols-4,
-  .game-gallery.cols-3 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .game-gallery.cols-2 {
+  .game-gallery {
     grid-template-columns: repeat(2, 1fr);
   }
 
