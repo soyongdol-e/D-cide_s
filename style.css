@@ -2135,6 +2135,8 @@ footer {
   user-select: none;
   transition: transform 0.1s;
   font-size: var(--font-size-lg);
+  background: #EC4899;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .survival-circle:hover { transform: scale(1.08); }
@@ -2185,8 +2187,8 @@ footer {
 
 .numsum-grid {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
   margin-bottom: var(--space-lg);
   user-select: none;
 }
@@ -2199,7 +2201,7 @@ footer {
   background: var(--bg-tertiary);
   border-radius: var(--radius-sm);
   font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   cursor: pointer;
   transition: all 0.1s;
   border: 2px solid transparent;

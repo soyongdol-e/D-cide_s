@@ -2117,13 +2117,16 @@ document.getElementById('team-restart').addEventListener('click', () => {
     spawnTimer = setTimeout(spawnLoop, 700 + Math.random() * 600);
   }
 
+  const circleColors = ['#FF6B6B','#4ECDC4','#45B7D1','#F59E0B','#8B5CF6','#EC4899','#10AC84','#F97316'];
+
   function spawnCircle() {
-    const size = 44 + Math.floor(Math.random() * 20);
+    const size = 44 + Math.floor(Math.random() * 24);
     const x = Math.random() * (area.offsetWidth - size - 4);
     const y = Math.random() * (area.offsetHeight - size - 4);
+    const color = circleColors[Math.floor(Math.random() * circleColors.length)];
     const circle = document.createElement('div');
     circle.className = 'survival-circle';
-    circle.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
+    circle.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px;background:${color}`;
     area.appendChild(circle);
 
     const timeout = setTimeout(() => {
@@ -2249,16 +2252,18 @@ document.getElementById('team-restart').addEventListener('click', () => {
     wordEls.push(el);
   }
 
-  input.addEventListener('input', () => {
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
     const val = input.value.trim();
+    if (!val) return;
     const idx = wordEls.findIndex(w => w._text === val);
     if (idx !== -1) {
       wordEls[idx].remove();
       wordEls.splice(idx, 1);
       score += 10;
       scoreEl.textContent = score;
-      input.value = '';
     }
+    input.value = '';
   });
 
   function endGame() {
@@ -2280,7 +2285,7 @@ document.getElementById('team-restart').addEventListener('click', () => {
 
 // ==================== 숫자 합치기 ====================
 (function () {
-  const COLS = 9, ROWS = 6;
+  const COLS = 10, ROWS = 8;
   let grid = [], score = 0, timeLeft = 90;
   let running = false;
   let countTimer = null;
