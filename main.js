@@ -61,7 +61,7 @@ async function checkLeaderboardQualify(gameId, score) {
     return cfg.lowerIsBetter ? score < worst : score > worst;
   } catch (e) {
     console.error('리더보드 자격 확인 에러:', e);
-    return false;
+    return true; // 오류 시 일단 모달 허용
   }
 }
 
@@ -97,11 +97,16 @@ async function handleGameEnd(gameId, score) {
   if (!qualifies) return;
   const nickname = await showScoreModal(gameId, score);
   if (!nickname) return;
-  await db.collection('leaderboard').add({
-    gameId, nickname, score,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  loadLeaderboard(gameId, `${gameId}-leaderboard`);
+  try {
+    await db.collection('leaderboard').add({
+      gameId, nickname, score,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    loadLeaderboard(gameId, `${gameId}-leaderboard`);
+  } catch (e) {
+    console.error('리더보드 저장 에러:', e);
+    alert('기록 저장 실패: Firestore 보안 규칙을 확인해주세요.\n\n에러: ' + e.message);
+  }
 }
 
 // ==================== 홈/게임 뷰 전환 ====================
