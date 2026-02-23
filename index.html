@@ -44,9 +44,9 @@
           </div>
         </div>
         <div class="nav-dropdown-group">
-          <button class="nav-group-btn has-active">모임에서 <span class="nav-arrow">&#8964;</span></button>
+          <button class="nav-group-btn">모임에서 <span class="nav-arrow">&#8964;</span></button>
           <div class="nav-dropdown">
-            <button class="tab-btn active" data-game="ladder">사다리타기</button>
+            <button class="tab-btn" data-game="ladder">사다리타기</button>
             <button class="tab-btn" data-game="team">팀 정하기</button>
             <button class="tab-btn" data-game="order">순서 정하기</button>
           </div>
@@ -63,8 +63,108 @@
   </nav>
 
   <main>
+    <!-- 홈 갤러리 뷰 -->
+    <div id="home-view" class="home-view active">
+
+      <section class="category-section">
+        <div class="category-header">
+          <h2 class="category-title">결정했어!</h2>
+          <p class="category-desc">결정장애이신분들? 이쪽입니다.</p>
+        </div>
+        <div class="game-gallery cols-4">
+          <div class="game-card" data-game="menu">
+            <div class="game-card-thumb thumb-menu"></div>
+            <div class="game-card-body">
+              <h3>오늘 뭐 먹지?</h3>
+              <p>메뉴 고민, 랜덤으로 해결!</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="roulette">
+            <div class="game-card-thumb thumb-roulette"></div>
+            <div class="game-card-body">
+              <h3>룰렛 돌리기</h3>
+              <p>선택지를 넣고 운명에 맡겨봐!</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="petal">
+            <div class="game-card-thumb thumb-petal"></div>
+            <div class="game-card-body">
+              <h3>할까 말까?</h3>
+              <p>꽃잎으로 결정하는 오늘의 고민</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="recommend">
+            <div class="game-card-thumb thumb-recommend"></div>
+            <div class="game-card-body">
+              <h3>오늘 뭐 볼까?</h3>
+              <p>장르별 콘텐츠 랜덤 추천</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="category-section">
+        <div class="category-header">
+          <h2 class="category-title">모임에서</h2>
+          <p class="category-desc">모임이세요? 여기 한 번 들렀다가요</p>
+        </div>
+        <div class="game-gallery cols-3">
+          <div class="game-card" data-game="ladder">
+            <div class="game-card-thumb thumb-ladder"></div>
+            <div class="game-card-body">
+              <h3>사다리타기</h3>
+              <p>공정하게, 누가 걸릴지 두근두근</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="team">
+            <div class="game-card-thumb thumb-team"></div>
+            <div class="game-card-body">
+              <h3>팀 정하기</h3>
+              <p>무작위로 공정하게 팀을 나눠드려요</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="order">
+            <div class="game-card-thumb thumb-order"></div>
+            <div class="game-card-body">
+              <h3>순서 정하기</h3>
+              <p>발표 순서, 청소 당번 공정하게!</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="category-section">
+        <div class="category-header">
+          <h2 class="category-title">Game</h2>
+          <p class="category-desc">게임이 필요하다면? 드루와 드루와</p>
+        </div>
+        <div class="game-gallery cols-2">
+          <div class="game-card" data-game="balance">
+            <div class="game-card-thumb thumb-balance"></div>
+            <div class="game-card-body">
+              <h3>밸런스 게임</h3>
+              <p>둘 중 하나만 골라야 한다면?</p>
+            </div>
+          </div>
+          <div class="game-card" data-game="lotto">
+            <div class="game-card-thumb thumb-lotto"></div>
+            <div class="game-card-body">
+              <h3>로또 번호</h3>
+              <p>오늘의 행운 번호를 뽑아봐요</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 뒤로가기 바 (게임 활성 시 표시) -->
+    <div id="back-bar" class="back-bar">
+      <button id="back-to-home" class="back-home-btn">← 목록으로</button>
+    </div>
+
     <!-- 사다리타기 게임 -->
-    <section id="ladder-game" class="game-section active">
+    <section id="ladder-game" class="game-section">
       <p class="section-desc">누가 당첨될지 모르는 그 긴장감! 인원을 정하고 사다리를 타서 결과를 확인하세요.</p>
 
       <!-- Step 1: 인원수 입력 -->

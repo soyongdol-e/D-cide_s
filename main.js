@@ -1,3 +1,35 @@
+// ==================== 홈/게임 뷰 전환 ====================
+function showGame(gameId) {
+  document.getElementById('home-view').classList.remove('active');
+  document.getElementById('back-bar').style.display = 'block';
+
+  document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`${gameId}-game`).classList.add('active');
+
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.querySelector(`.tab-btn[data-game="${gameId}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  document.querySelectorAll('.nav-group-btn').forEach(b => b.classList.remove('has-active'));
+  if (activeBtn) {
+    const parentGroup = activeBtn.closest('.nav-dropdown-group');
+    if (parentGroup) parentGroup.querySelector('.nav-group-btn').classList.add('has-active');
+  }
+
+  document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
+
+  if (gameId === 'petal') startPetalGame();
+  loadComments(gameId);
+}
+
+function showHome() {
+  document.getElementById('home-view').classList.add('active');
+  document.getElementById('back-bar').style.display = 'none';
+  document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-group-btn').forEach(b => b.classList.remove('has-active'));
+}
+
 // 드롭다운 토글
 document.querySelectorAll('.nav-group-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
@@ -13,30 +45,23 @@ document.addEventListener('click', () => {
   document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
 });
 
-// 탭 전환
+// 네비게이션 탭 버튼
 document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(`${btn.dataset.game}-game`).classList.add('active');
+  btn.addEventListener('click', () => showGame(btn.dataset.game));
+});
 
-    // 드롭다운 닫기 + 현재 활성 그룹 표시
-    document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
-    document.querySelectorAll('.nav-group-btn').forEach(b => b.classList.remove('has-active'));
-    const parentGroup = btn.closest('.nav-dropdown-group');
-    if (parentGroup) {
-      parentGroup.querySelector('.nav-group-btn').classList.add('has-active');
-    }
+// 홈 갤러리 카드
+document.querySelectorAll('.game-card').forEach(card => {
+  card.addEventListener('click', () => showGame(card.dataset.game));
+});
 
-    // petal 탭이 선택되면 자동으로 꽃잎 게임 시작
-    if (btn.dataset.game === 'petal') {
-      startPetalGame();
-    }
+// 뒤로가기 버튼
+document.getElementById('back-to-home').addEventListener('click', showHome);
 
-    // 댓글 로드
-    loadComments(btn.dataset.game);
-  });
+// 로고 클릭 → 홈으로
+document.querySelector('.nav-logo').addEventListener('click', (e) => {
+  e.preventDefault();
+  showHome();
 });
 
 // ==================== 댓글 기능 ====================
