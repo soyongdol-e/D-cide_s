@@ -27,16 +27,33 @@
     <h1>딱 정해줄게</h1>
   </header>
 
-  <nav class="game-tabs">
-    <button class="tab-btn active" data-game="ladder">사다리타기</button>
-    <button class="tab-btn" data-game="roulette">룰렛 돌리기</button>
-    <button class="tab-btn" data-game="menu">오늘 뭐 먹지?</button>
-    <button class="tab-btn" data-game="lotto">로또 번호</button>
-    <button class="tab-btn" data-game="petal">할까 말까?</button>
-    <button class="tab-btn" data-game="order">순서 정하기</button>
-    <button class="tab-btn" data-game="balance">밸런스 게임</button>
-    <button class="tab-btn" data-game="recommend">오늘 뭐 볼까?</button>
-    <button class="tab-btn" data-game="team">팀 정하기</button>
+  <nav class="main-nav">
+    <div class="nav-group">
+      <span class="nav-group-title">결정했어!</span>
+      <div class="nav-group-items">
+        <button class="tab-btn" data-game="menu">오늘 뭐 먹지?</button>
+        <button class="tab-btn" data-game="roulette">룰렛 돌리기</button>
+        <button class="tab-btn" data-game="petal">할까 말까?</button>
+        <button class="tab-btn" data-game="recommend">오늘 뭐 볼까?</button>
+      </div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-group">
+      <span class="nav-group-title">모임에서</span>
+      <div class="nav-group-items">
+        <button class="tab-btn active" data-game="ladder">사다리타기</button>
+        <button class="tab-btn" data-game="team">팀 정하기</button>
+        <button class="tab-btn" data-game="order">순서 정하기</button>
+      </div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-group">
+      <span class="nav-group-title">Game</span>
+      <div class="nav-group-items">
+        <button class="tab-btn" data-game="balance">밸런스 게임</button>
+        <button class="tab-btn" data-game="lotto">로또 번호</button>
+      </div>
+    </div>
   </nav>
 
   <main>
