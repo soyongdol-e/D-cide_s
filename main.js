@@ -1,3 +1,18 @@
+// 드롭다운 토글
+document.querySelectorAll('.nav-group-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const group = btn.closest('.nav-dropdown-group');
+    const isOpen = group.classList.contains('open');
+    document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
+    if (!isOpen) group.classList.add('open');
+  });
+});
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
+});
+
 // 탭 전환
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -5,6 +20,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById(`${btn.dataset.game}-game`).classList.add('active');
+
+    // 드롭다운 닫기 + 현재 활성 그룹 표시
+    document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
+    document.querySelectorAll('.nav-group-btn').forEach(b => b.classList.remove('has-active'));
+    const parentGroup = btn.closest('.nav-dropdown-group');
+    if (parentGroup) {
+      parentGroup.querySelector('.nav-group-btn').classList.add('has-active');
+    }
 
     // petal 탭이 선택되면 자동으로 꽃잎 게임 시작
     if (btn.dataset.game === 'petal') {
