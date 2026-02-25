@@ -226,6 +226,7 @@ body {
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
+  text-decoration: none;
   transition: all var(--transition-fast);
 }
 

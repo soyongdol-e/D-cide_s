@@ -161,13 +161,8 @@ document.querySelectorAll('.nav-dropdown-group').forEach(group => {
   group.addEventListener('mouseleave', () => group.classList.remove('open'));
 });
 
-// 네비게이션 탭 버튼
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => showGame(btn.dataset.game));
-});
-
-// 홈 갤러리 카드
-document.querySelectorAll('.game-card').forEach(card => {
+// 홈 갤러리 카드 (게임 카드는 이제 <a href>로 직접 이동하므로 이 핸들러는 보조용)
+document.querySelectorAll('.game-card[data-game]').forEach(card => {
   card.addEventListener('click', () => showGame(card.dataset.game));
 });
 
