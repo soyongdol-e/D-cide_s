@@ -80,14 +80,14 @@ function showScoreModal(gameId, score) {
   });
 }
 
-document.getElementById(\1)?.addEventListener('click', async () => {
+document.getElementById('score-modal-confirm')?.addEventListener('click', async () => {
   const nickname = document.getElementById('score-modal-nickname').value.trim();
   if (!nickname) { alert('닉네임을 입력해주세요!'); return; }
   document.getElementById('score-modal').style.display = 'none';
   if (_scoreModalResolve) { _scoreModalResolve(nickname); _scoreModalResolve = null; }
 });
 
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('score-modal-skip')?.addEventListener('click', () => {
   document.getElementById('score-modal').style.display = 'none';
   if (_scoreModalResolve) { _scoreModalResolve(null); _scoreModalResolve = null; }
 });
@@ -123,16 +123,6 @@ function showGame(gameId) {
   document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
   document.getElementById(`${gameId}-game`).classList.add('active');
 
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  const activeBtn = document.querySelector(`.tab-btn[data-game="${gameId}"]`);
-  if (activeBtn) activeBtn.classList.add('active');
-
-  document.querySelectorAll('.nav-group-btn').forEach(b => b.classList.remove('has-active'));
-  if (activeBtn) {
-    const parentGroup = activeBtn.closest('.nav-dropdown-group');
-    if (parentGroup) parentGroup.querySelector('.nav-group-btn').classList.add('has-active');
-  }
-
   document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
 
   if (gameId === 'petal') startPetalGame();
@@ -151,23 +141,36 @@ function showHome() {
   document.getElementById('home-view').classList.add('active');
   document.getElementById('back-bar').style.display = 'none';
   document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.nav-group-btn').forEach(b => b.classList.remove('has-active'));
 }
 
-// 드롭다운: mouseenter/mouseleave로 open 클래스 토글
-document.querySelectorAll('.nav-dropdown-group').forEach(group => {
-  group.addEventListener('mouseenter', () => group.classList.add('open'));
-  group.addEventListener('mouseleave', () => group.classList.remove('open'));
+// 드롭다운 토글
+document.querySelectorAll('.nav-group-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const group = btn.closest('.nav-dropdown-group');
+    const isOpen = group.classList.contains('open');
+    document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
+    if (!isOpen) group.classList.add('open');
+  });
 });
 
-// 홈 갤러리 카드 (게임 카드는 이제 <a href>로 직접 이동하므로 이 핸들러는 보조용)
-document.querySelectorAll('.game-card[data-game]').forEach(card => {
+document.addEventListener('click', () => {
+  document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
+});
+
+// 네비게이션 탭 버튼
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => showGame(btn.dataset.game));
+});
+
+// 홈 갤러리 카드
+document.querySelectorAll('.game-card').forEach(card => {
   card.addEventListener('click', () => showGame(card.dataset.game));
 });
 
 // 뒤로가기 버튼
-document.getElementById(\1)?.addEventListener('click', showHome);
+document.getElementById('back-to-home')?.addEventListener('click', showHome);
 
 // 로고 클릭 → 홈으로
 document.querySelector('.nav-logo').addEventListener('click', (e) => {
@@ -339,14 +342,10 @@ document.querySelectorAll('.comment-section').forEach(section => {
   });
 });
 
-// 초기 댓글 로드 + 개별 게임 페이지 자동 초기화
+// 개별 게임 페이지 자동 초기화
 document.addEventListener('DOMContentLoaded', () => {
   const gameId = document.body.dataset.game;
   if (gameId) {
-    const section = document.getElementById(gameId + '-game');
-    if (section) section.classList.add('active');
-    const backBar = document.getElementById('back-bar');
-    if (backBar) backBar.style.display = 'block';
     const lbGames = ['reaction', 'click-survival', 'typing', 'numsum', 'sliding'];
     if (lbGames.includes(gameId)) loadLeaderboard(gameId, `${gameId}-leaderboard`);
     loadComments(gameId);
@@ -377,7 +376,7 @@ const pathColors = [
 ];
 
 // Step 1: 인원수 확인
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('confirm-count')?.addEventListener('click', () => {
   const count = parseInt(document.getElementById('ladder-count').value);
 
   if (count < 2 || count > 20 || isNaN(count)) {
@@ -391,7 +390,7 @@ document.getElementById(\1)?.addEventListener('click', () => {
 });
 
 // Enter 키로도 확인
-document.getElementById(\1)?.addEventListener('keypress', (e) => {
+document.getElementById('ladder-count')?.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     document.getElementById('confirm-count').click();
   }
@@ -474,7 +473,7 @@ function renderBottomLabels() {
 }
 
 // 빠른 입력 (당첨/꽝) 적용
-document.getElementById(\1)?.addEventListener('click', applyQuickFill);
+document.getElementById('apply-quick-fill')?.addEventListener('click', applyQuickFill);
 
 function applyQuickFill() {
   const winCount = parseInt(document.getElementById('win-count').value) || 0;
@@ -531,14 +530,14 @@ function drawPreviewLadder() {
 }
 
 // Step 1로 돌아가기
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('back-to-step1')?.addEventListener('click', () => {
   document.getElementById('ladder-step1').style.display = 'block';
   document.getElementById('ladder-step2').style.display = 'none';
   document.getElementById('ladder-step3').style.display = 'none';
 });
 
 // 사다리타기 시작
-document.getElementById(\1)?.addEventListener('click', startLadderGame);
+document.getElementById('start-ladder')?.addEventListener('click', startLadderGame);
 
 function startLadderGame() {
   // 상단 라벨 수집
@@ -810,7 +809,7 @@ function runLadder(startIndex) {
 }
 
 // 전체 결과 보기
-document.getElementById(\1)?.addEventListener('click', showAllResults);
+document.getElementById('show-all-results')?.addEventListener('click', showAllResults);
 
 function showAllResults() {
   if (ladderData.isAnimating) return;
@@ -879,7 +878,7 @@ function showAllResults() {
 }
 
 // 다시하기
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('reset-ladder')?.addEventListener('click', () => {
   document.getElementById('ladder-step1').style.display = 'block';
   document.getElementById('ladder-step2').style.display = 'none';
   document.getElementById('ladder-step3').style.display = 'none';
@@ -913,7 +912,7 @@ const rouletteColors = [
   '#BB8FCE', '#85C1E9', '#F8B500', '#00CED1'
 ];
 
-document.getElementById(\1)?.addEventListener('click', createRoulette);
+document.getElementById('create-roulette')?.addEventListener('click', createRoulette);
 
 function createRoulette() {
   const itemsInput = document.getElementById('roulette-items').value;
@@ -990,7 +989,7 @@ function drawRoulette() {
   ctx.stroke();
 }
 
-document.getElementById(\1)?.addEventListener('click', spinRoulette);
+document.getElementById('spin-roulette')?.addEventListener('click', spinRoulette);
 
 function spinRoulette() {
   if (rouletteData.isSpinning) return;
@@ -1057,8 +1056,8 @@ const menuData = {
 
 let menuAnimationId = null;
 
-document.getElementById(\1)?.addEventListener('click', pickRandomMenu);
-document.getElementById(\1)?.addEventListener('click', pickRandomMenu);
+document.getElementById('pick-menu')?.addEventListener('click', pickRandomMenu);
+document.getElementById('pick-menu-again')?.addEventListener('click', pickRandomMenu);
 
 function pickRandomMenu() {
   // 선택된 카테고리 수집
@@ -1130,7 +1129,7 @@ function pickRandomMenu() {
 }
 
 // ==================== 로또 번호 생성기 ====================
-document.getElementById(\1)?.addEventListener('click', generateLottoNumbers);
+document.getElementById('generate-lotto')?.addEventListener('click', generateLottoNumbers);
 
 function generateLottoNumbers() {
   const gameCount = parseInt(document.getElementById('lotto-game-count').value);
@@ -1298,7 +1297,7 @@ function showPetalResult() {
 }
 
 // 다시 하기
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('petal-restart')?.addEventListener('click', () => {
   startPetalGame();
 });
 
@@ -1310,7 +1309,7 @@ let orderData = {
 };
 
 // Step 1: 인원수 확인
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('order-confirm-count')?.addEventListener('click', () => {
   const count = parseInt(document.getElementById('order-count').value);
 
   if (count < 2 || isNaN(count)) {
@@ -1323,7 +1322,7 @@ document.getElementById(\1)?.addEventListener('click', () => {
 });
 
 // Enter 키로도 확인
-document.getElementById(\1)?.addEventListener('keypress', (e) => {
+document.getElementById('order-count')?.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     document.getElementById('order-confirm-count').click();
   }
@@ -1390,14 +1389,14 @@ function renderOrderInputs() {
 }
 
 // Step 1로 돌아가기
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('order-back-to-step1')?.addEventListener('click', () => {
   document.getElementById('order-step1').style.display = 'block';
   document.getElementById('order-step2').style.display = 'none';
   document.getElementById('order-step3').style.display = 'none';
 });
 
 // 순서 정하기 시작
-document.getElementById(\1)?.addEventListener('click', startOrderGame);
+document.getElementById('order-start')?.addEventListener('click', startOrderGame);
 
 function startOrderGame() {
   // 이름 또는 숫자 수집
@@ -1447,7 +1446,7 @@ function startOrderGame() {
 }
 
 // 다시하기
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('order-restart')?.addEventListener('click', () => {
   document.getElementById('order-step1').style.display = 'block';
   document.getElementById('order-step2').style.display = 'none';
   document.getElementById('order-step3').style.display = 'none';
@@ -1608,10 +1607,10 @@ let balanceData = {
   usedQuestions: []
 };
 
-document.getElementById(\1)?.addEventListener('click', showBalanceQuestion);
-document.getElementById(\1)?.addEventListener('click', showBalanceQuestion);
+document.getElementById('balance-start')?.addEventListener('click', showBalanceQuestion);
+document.getElementById('balance-next')?.addEventListener('click', showBalanceQuestion);
 
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('balance-restart')?.addEventListener('click', () => {
   document.getElementById('balance-intro').style.display = 'block';
   document.getElementById('balance-question').style.display = 'none';
   balanceData.usedQuestions = [];
@@ -1662,8 +1661,8 @@ function showBalanceQuestion() {
   }, 500);
 }
 
-document.getElementById(\1)?.addEventListener('click', () => selectBalance('a'));
-document.getElementById(\1)?.addEventListener('click', () => selectBalance('b'));
+document.getElementById('balance-choice-a')?.addEventListener('click', () => selectBalance('a'));
+document.getElementById('balance-choice-b')?.addEventListener('click', () => selectBalance('b'));
 
 function selectBalance(choice) {
   const choiceA = document.getElementById('balance-choice-a');
@@ -1754,8 +1753,8 @@ const recommendData = {
 
 let recommendAnimationId = null;
 
-document.getElementById(\1)?.addEventListener('click', pickRandomRecommend);
-document.getElementById(\1)?.addEventListener('click', pickRandomRecommend);
+document.getElementById('pick-recommend')?.addEventListener('click', pickRandomRecommend);
+document.getElementById('pick-recommend-again')?.addEventListener('click', pickRandomRecommend);
 
 function pickRandomRecommend() {
   const checkboxes = document.querySelectorAll('.recommend-categories input[type="checkbox"]:checked');
@@ -1828,7 +1827,7 @@ let teamData = {
 };
 
 // Step 1: 팀/인원수 확인
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('team-confirm-count')?.addEventListener('click', () => {
   const teamCount = parseInt(document.getElementById('team-count').value);
   const memberCount = parseInt(document.getElementById('team-member-count').value);
 
@@ -1856,13 +1855,13 @@ document.getElementById(\1)?.addEventListener('click', () => {
 });
 
 // Enter 키로도 확인
-document.getElementById(\1)?.addEventListener('keypress', (e) => {
+document.getElementById('team-count')?.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     document.getElementById('team-member-count').focus();
   }
 });
 
-document.getElementById(\1)?.addEventListener('keypress', (e) => {
+document.getElementById('team-member-count')?.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     document.getElementById('team-confirm-count').click();
   }
@@ -1904,7 +1903,7 @@ function renderTeamLeaderInputs() {
 }
 
 // Step 3: 팀장 이름 확인 후 번호 정하기 안내
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('team-confirm-leaders')?.addEventListener('click', () => {
   teamData.leaderNames = [];
 
   for (let i = 0; i < teamData.teamCount; i++) {
@@ -1922,7 +1921,7 @@ document.getElementById(\1)?.addEventListener('click', () => {
 });
 
 // Step 4: 번호 정했어요 -> 결과 생성
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('team-number-ready')?.addEventListener('click', () => {
   document.getElementById('team-step4').style.display = 'none';
   document.getElementById('team-step5').style.display = 'block';
 
@@ -2019,7 +2018,7 @@ function generateTeamResult() {
 }
 
 // 다시하기
-document.getElementById(\1)?.addEventListener('click', () => {
+document.getElementById('team-restart')?.addEventListener('click', () => {
   document.getElementById('team-step1').style.display = 'block';
   document.getElementById('team-step2').style.display = 'none';
   document.getElementById('team-step3').style.display = 'none';
