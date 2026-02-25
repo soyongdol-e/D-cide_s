@@ -111,7 +111,7 @@ async function handleGameEnd(gameId, score) {
 
 // ==================== 홈/게임 뷰 전환 ====================
 function showGame(gameId) {
-  if (!document.getElementById('home-view')) {
+  if (!document.getElementById(gameId + '-game')) {
     window.location.href = '/' + gameId + '.html';
     return;
   }
@@ -153,20 +153,7 @@ function showHome() {
   document.querySelectorAll('.nav-group-btn').forEach(b => b.classList.remove('has-active'));
 }
 
-// 드롭다운 토글
-document.querySelectorAll('.nav-group-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const group = btn.closest('.nav-dropdown-group');
-    const isOpen = group.classList.contains('open');
-    document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
-    if (!isOpen) group.classList.add('open');
-  });
-});
-
-document.addEventListener('click', () => {
-  document.querySelectorAll('.nav-dropdown-group').forEach(g => g.classList.remove('open'));
-});
+// 드롭다운은 CSS hover로만 동작 (JS 클릭 토글 제거)
 
 // 네비게이션 탭 버튼
 document.querySelectorAll('.tab-btn').forEach(btn => {
