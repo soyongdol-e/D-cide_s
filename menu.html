@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="오늘 뭐 먹지? 메뉴 고민 해결! 한식·중식·일식·양식·분식 중 카테고리를 선택하면 랜덤으로 메뉴를 추천해드립니다." />
+  <title>오늘 뭐 먹지? - 랜덤 메뉴 추천기 | 딱 정해줄게</title>
+  <link rel="canonical" href="https://d-cide-s.pages.dev/menu.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="오늘 뭐 먹지? - 랜덤 메뉴 추천기" />
+  <meta property="og:description" content="메뉴 고민 해결! 카테고리를 선택하면 랜덤으로 오늘의 메뉴를 추천해드립니다." />
+  <meta property="og:url" content="https://d-cide-s.pages.dev/menu.html" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:site_name" content="딱 정해줄게" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href='/style.css' rel='stylesheet'>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body data-game="menu">
+  <header class="site-header">
+    <div class="header-inner">
+      <h1>딱 정해줄게</h1>
+      <p class="header-tagline">결정이 어려울 때, 운에 맡겨보세요</p>
+    </div>
+  </header>
+
+  <nav class="main-nav" id="main-nav">
+    <div class="nav-inner">
+      <a class="nav-logo" href="/">딱 정해줄게</a>
+      <div class="nav-groups">
+        <div class="nav-dropdown-group">
+          <button class="nav-group-btn">결정했어! <span class="nav-arrow">&#8964;</span></button>
+          <div class="nav-dropdown">
+            <button class="tab-btn" data-game="menu">오늘 뭐 먹지?</button>
+            <button class="tab-btn" data-game="roulette">룰렛 돌리기</button>
+            <button class="tab-btn" data-game="petal">할까 말까?</button>
+            <button class="tab-btn" data-game="recommend">오늘 뭐 볼까?</button>
+          </div>
+        </div>
+        <div class="nav-dropdown-group">
+          <button class="nav-group-btn">모임에서 <span class="nav-arrow">&#8964;</span></button>
+          <div class="nav-dropdown">
+            <button class="tab-btn" data-game="ladder">사다리타기</button>
+            <button class="tab-btn" data-game="team">팀 정하기</button>
+            <button class="tab-btn" data-game="order">순서 정하기</button>
+          </div>
+        </div>
+        <div class="nav-dropdown-group">
+          <button class="nav-group-btn">Game <span class="nav-arrow">&#8964;</span></button>
+          <div class="nav-dropdown">
+            <button class="tab-btn" data-game="balance">밸런스 게임</button>
+            <button class="tab-btn" data-game="lotto">로또 번호</button>
+            <button class="tab-btn" data-game="reaction">반응속도 게임</button>
+            <button class="tab-btn" data-game="click-survival">클릭 서바이벌</button>
+            <button class="tab-btn" data-game="typing">타이핑 게임</button>
+            <button class="tab-btn" data-game="numsum">숫자 합치기</button>
+            <button class="tab-btn" data-game="sliding">퍼즐 슬라이딩</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div id="back-bar" class="back-bar">
+      <button id="back-to-home" class="back-home-btn">← 목록으로</button>
+    </div>
+
+    <section id="menu-game" class="game-section">
+      <h3>오늘 뭐 먹지?</h3>
+      <p class="section-desc">오늘 메뉴 고민되나요? 카테고리를 선택하면 랜덤으로 메뉴를 추천해드립니다.</p>
+      <div class="menu-categories">
+        <label class="category-checkbox"><input type="checkbox" value="korean" checked><span class="category-label">한식</span></label>
+        <label class="category-checkbox"><input type="checkbox" value="chinese" checked><span class="category-label">중식</span></label>
+        <label class="category-checkbox"><input type="checkbox" value="japanese" checked><span class="category-label">일식</span></label>
+        <label class="category-checkbox"><input type="checkbox" value="western" checked><span class="category-label">양식</span></label>
+        <label class="category-checkbox"><input type="checkbox" value="snack" checked><span class="category-label">분식</span></label>
+      </div>
+      <button id="pick-menu" class="primary-btn">메뉴 추천받기!</button>
+      <div id="menu-result" class="menu-result-area">
+        <div id="menu-display" class="menu-display"></div>
+        <div id="menu-category-display" class="menu-category-display"></div>
+      </div>
+      <button id="pick-menu-again" class="secondary-btn" style="display:none; margin: var(--space-md) auto 0;">다시 뽑기</button>
+
+      <div class="comment-section" data-game="menu">
+        <h4 class="comment-title">댓글</h4>
+        <div class="comment-form">
+          <input type="text" class="comment-nickname" placeholder="닉네임" maxlength="20">
+          <textarea class="comment-content" placeholder="댓글을 입력하세요" maxlength="200"></textarea>
+          <input type="password" class="comment-password" placeholder="비밀번호 (삭제용)" maxlength="10">
+          <button class="comment-submit-btn">댓글 작성</button>
+        </div>
+        <div class="comment-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-col">
+        <strong class="footer-brand">딱 정해줄게</strong>
+        <p>결정이 어려울 때, 운에 맡겨보세요.<br>다양한 랜덤 도구로 일상의 고민을 해결합니다.</p>
+      </div>
+      <div class="footer-col">
+        <strong>사이트 소개</strong>
+        <p>딱 정해줄게는 사다리타기, 룰렛, 밸런스 게임 등<br>다양한 무작위 결정 도구를 무료로 제공하는 서비스입니다.</p>
+      </div>
+      <div class="footer-col">
+        <strong>개인정보처리방침</strong>
+        <p>게임 내 입력된 정보는 일회성으로 사용 후 즉시 소멸됩니다.<br>댓글 작성 시 닉네임과 비밀번호 외의 개인정보는 수집하지 않습니다.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 딱 정해줄게 · <a href="/about.html" style="color:inherit;">사이트 소개</a> · <a href="/privacy.html" style="color:inherit;">개인정보처리방침</a></p>
+    </div>
+  </footer>
+
+  <script src="/firebase-config.js"></script>
+  <script defer type="text/javascript" src="/main.js"></script>
+</body>
+</html>
