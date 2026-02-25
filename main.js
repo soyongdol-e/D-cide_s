@@ -2036,6 +2036,8 @@ document.getElementById(\1)?.addEventListener('click', () => {
 
 // ==================== 반응속도 게임 ====================
 (function () {
+  if (!document.getElementById('reaction-box')) return;
+
   const ROUNDS = 5;
   let state = 'idle'; // idle | waiting | go | early
   let timer = null;
@@ -2097,6 +2099,8 @@ document.getElementById(\1)?.addEventListener('click', () => {
 
 // ==================== 클릭 서바이벌 ====================
 (function () {
+  if (!document.getElementById('survival-area')) return;
+
   let score = 0, miss = 0, timeLeft = 60;
   let running = false;
   let spawnTimer = null, countTimer = null;
@@ -2182,6 +2186,8 @@ document.getElementById(\1)?.addEventListener('click', () => {
 
 // ==================== 타이핑 게임 ====================
 (function () {
+  if (!document.getElementById('typing-area')) return;
+
   const WORDS = [
     '사과', '바나나', '딸기', '포도', '수박', '키위', '레몬', '망고', '복숭아', '체리',
     '고양이', '강아지', '토끼', '햄스터', '거북이', '앵무새', '금붕어', '다람쥐',
@@ -2304,6 +2310,8 @@ document.getElementById(\1)?.addEventListener('click', () => {
 
 // ==================== 숫자 합치기 ====================
 (function () {
+  if (!document.getElementById('numsum-grid')) return;
+
   const COLS = 10, ROWS = 8;
   let grid = [], score = 0, timeLeft = 90;
   let running = false;
@@ -2504,6 +2512,8 @@ document.getElementById(\1)?.addEventListener('click', () => {
 
 // ==================== 퍼즐 슬라이딩 ====================
 (function () {
+  if (!document.getElementById('sliding-board')) return;
+
   const SIZE = 4;
   let tiles = [];
   let moves = 0, timeElapsed = 0;
