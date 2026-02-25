@@ -115,8 +115,10 @@ function showGame(gameId) {
     window.location.href = '/' + gameId + '.html';
     return;
   }
-  document.getElementById('home-view').classList.remove('active');
-  document.getElementById('back-bar').style.display = 'block';
+  const homeView = document.getElementById('home-view');
+  if (homeView) homeView.classList.remove('active');
+  const backBar = document.getElementById('back-bar');
+  if (backBar) backBar.style.display = 'block';
 
   document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
   document.getElementById(`${gameId}-game`).classList.add('active');
@@ -153,7 +155,11 @@ function showHome() {
   document.querySelectorAll('.nav-group-btn').forEach(b => b.classList.remove('has-active'));
 }
 
-// 드롭다운은 CSS hover로만 동작 (JS 클릭 토글 제거)
+// 드롭다운: mouseenter/mouseleave로 open 클래스 토글
+document.querySelectorAll('.nav-dropdown-group').forEach(group => {
+  group.addEventListener('mouseenter', () => group.classList.add('open'));
+  group.addEventListener('mouseleave', () => group.classList.remove('open'));
+});
 
 // 네비게이션 탭 버튼
 document.querySelectorAll('.tab-btn').forEach(btn => {
